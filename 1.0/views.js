@@ -61,14 +61,20 @@ KISSY.add(function(S, Event, XTemplate, Watch, Do){
           // XTemplate执行函数，只在block语法下需要，比如linkage、list
           fn: fn,
           // 其他参数，{{watch "text: key: argv0: argv1}}
-          argv: argv
+          argv: argv,
+          name: this.name,
+          view: this
         });
 
-        this.on('inited', function(){
+        var _init = function(){
           // dom ready
           w.$control('el', this.el.all(selector));
           w.fire('ready');
-        }, this)
+
+          this.detach('inited', _init);
+        }
+
+        this.on('inited', _init);
 
         html = w.$html || html;
 

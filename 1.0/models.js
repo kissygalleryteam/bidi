@@ -36,10 +36,6 @@ KISSY.add(function(S, evaluation){
         return this._getByParent(key, parent);
       }
 
-      if (this.__parent__ && key in this.__parent__) {
-        return this.__parent__[key];
-      }
-
       var val = this.attributes[key]; 
 
       if (typeof val == 'function') {
@@ -63,9 +59,8 @@ KISSY.add(function(S, evaluation){
       var ret = val[key];
 
       if (S.isFunction(ret)){
-        this.__parent__ = val;
-        ret = ret.call(this);
-        delete this.__parent__;
+        //如果在list中，函数第一个参数是，list所在的对象
+        ret = ret.call(this, parent);
       }
 
       if (this.__recode) {
@@ -151,7 +146,7 @@ KISSY.add(function(S, evaluation){
       if (S.isArray(key)){
 
         evt = S.map(key, function(name){
-          return 'change:' + name;
+          return 'change:' + name + ' add:' + name + ' remove:' + name;
         }).join(' ');
 
       } else {
@@ -197,6 +192,53 @@ KISSY.add(function(S, evaluation){
 
       return this;
 
+    },
+
+    /**
+     * 删除集合中的一个元素
+     * @param {object} obj 集合元素
+     * @public
+     * @return this
+     */
+    remove: function(obj){
+
+      if (this.__forbidden_set) return;
+
+      var parentKey = obj.name;
+      var lists = this.get(parentKey);
+      var index;
+
+      S.some(lists, function(list, i){
+        if (list['__parent__'].id === obj.id){
+          index = i;
+          return true;
+        }
+      });
+
+      //删除元素
+      lists.splice(index, 1);
+      this.fire('remove:' + parentKey, {id: obj.id, index: index});
+
+      return this;
+    },
+
+    /**
+     * 在list中添加一个元素
+     * @param {object} obj 需要加入元素
+     * @param {string} key 需要增加的属性
+     * @public
+     */
+    add: function(obj, key){
+
+      if (this.__forbidden_set) return;
+
+      obj['__parent__'] = { id: S.guid('$id'), name: key};
+      var lists = this.get(key);
+
+      lists.push(obj);
+      this.fire('add:' + key, {obj: obj});
+
+      return this;
     },
 
     /**

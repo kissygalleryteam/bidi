@@ -12,8 +12,6 @@ KISSY.add(function(S){
       var el = $control('el');
       var parent = $control('parent');
 
-      //if (val) { el.val(val); }
-
       el.on('change', function(){
         if (model.val)
            return model.val(key, el.val());

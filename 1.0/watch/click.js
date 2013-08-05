@@ -12,7 +12,7 @@ KISSY.add(function(S){
       var selector = $control('selector');
 
       $control('base').delegate('click', selector, function(){
-        model.get(key);
+        model.get(key, $control('parent'));
       });
 
     });

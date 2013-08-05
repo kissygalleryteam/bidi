@@ -98,7 +98,6 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, Form, View, Watcher){
 
     list: function(scopes, option, params, name, html){
 
-      html = '';
       var model = Views[name].model;
       var len = scopes.length - 1;
 
@@ -107,6 +106,8 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, Form, View, Watcher){
       var param0 = option.params[0];
       var opScopes = [0, 0].concat(scopes);
       var xcount = param0.length;
+
+      var buf = '';
 
       for (var xindex = 0; xindex < xcount; xindex++) {
         // two more variable scope for array looping
@@ -120,12 +121,19 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, Form, View, Watcher){
           xcount: xcount,
           xindex: xindex
         };
-        html += option.fn(opScopes);
+        buf += option.fn(opScopes);
       }
 
-      //html += option.commands.each(scopes, option);
+      //找到tag是什么,list会生成一个相同tag的dom
+      var tag = /\s*<(\w+)[\s>]/.exec(buf);
+      if (tag){
+        html = html.replace(/{tag}/g, tag[1]);
+      } else {
+        S.error('str no support tag regexper' + tag);
+      }
 
-      return html;
+      return html + buf;
+
     }
 
   };

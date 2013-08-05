@@ -33,13 +33,13 @@
             {{/each}}
         </select></td>
         <td {{watch "text: price: formattedPrice"}}></td>
-        <td><a href="#nowhere" {{watch "click1: removeSeat"}}>Remove</a></td>
+        <td><a href="#nowhere" {{watch "click: remove"}}>Remove</a></td>
       </tr>
       {{/watch}}
     </tbody>
   </table>
 
-  <button data-bind="click: addSeat, enable: seats().length < 5">Reserve another seat</button>
+  <button {{watch "click: addSeat"}}>Reserve another seat</button>
 
   <h3 data-bind="visible: totalSurcharge() > 0">
     Total surcharge: $<span {{watch "text: totalSurcharge"}}></span>
@@ -66,11 +66,6 @@
 
     S.use('gallery/bidi/1.0/index', function (S, Bidi) {
 
-      function getPrice(){
-        var meal = this.get('meal');
-        var m = this.get('meals')[meal];
-        return m.price;
-      }
 
       function formattedPrice(price){
         return price ? "$" + price.toFixed(2) : "None";        
@@ -78,10 +73,25 @@
 
       Bidi.pipe('formattedPrice', formattedPrice);
 
+      function Seat(name, meal){
+        this.name = name;
+        this.meal = meal;
+      }
+
+      Seat.prototype.price = function(seat){
+        var meal = this.get('meal', seat);
+        var m = this.get('meals')[meal];
+        return m.price;
+      };
+
+      Seat.prototype.remove = function(seat){
+        this.remove(seat);
+      };
+
       Bidi.xbind('list', {
         seats: [
-          {name: "Steve", meal: 0, price: getPrice},
-          {name: "Hanwen", meal: 1, price: getPrice}
+          new Seat('Steve', 0),
+          new Seat('Hanwen', 1)
         ],
         meals: [
           { mealName: "Standard (sandwich)", price: 0 },
@@ -98,6 +108,10 @@
           }, this);
 
           return price;
+        },
+        addSeat: function(){
+          var seat = new Seat('Haha', 2);
+          this.add(seat, 'seats');
         }
       });
 

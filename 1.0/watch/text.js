@@ -12,7 +12,6 @@ KISSY.add(function(S){
         var model = $control('model');
         var key = $control('key');
 
-        var val = model.get(key);
         var el = $control('el');
         var expr = model.evaluation($control);
 

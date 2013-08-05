@@ -24,11 +24,21 @@
     </select>
   </p>
 
-  <p class="item" {{watch "class: !reasons: hide"}}>
+  <p class="item" {{watch "class: !reasons.values: hide"}}>
     <label>问题描述：</label>
-    {{#watch "linkage: reasons.values: problem" "radio: reasons"}}
+    {{#watch "linkage: reasons.values: problem" "radio: reasons.defaultValue"}}
     <label>
       <input type="radio" name="name1" value="{{value}}"/>
+      {{text}}
+    </label>
+    {{/watch}}
+  </p>
+
+  <p class="item hide" {{watch "class: !subs.values: hide"}}>
+    <label>问题描述第三级：</label>
+    {{#watch "linkage: subs.values: reasons"}}
+    <label>
+      <input type="radio" name="name2" value="{{value}}"/>
       {{text}}
     </label>
     {{/watch}}
@@ -62,11 +72,11 @@
     {{/each}}
   </p>
 
-  <p class="item hide" {{watch "class: !reasons.jude || itemSendBack: hide"}}>
+  <p class="item hide" {{watch "class: !reasons.$item.jude || itemSendBack: hide"}}>
     <label>要求谁来评判: </label>
     {{#each jude.values}}
     <label>
-      <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.jude: disabled"}}/>
+      <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.$item.jude: disabled"}}/>
       {{text}}
     </label>
     {{/each}}

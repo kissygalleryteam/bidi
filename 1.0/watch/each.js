@@ -25,7 +25,9 @@ KISSY.add(function(S, XTemplate){
           html = html.runtime.option.commands.each([model.get(key)], option);
           el.html(html);
 
-          model.fire('change:' + key);
+          var paths = key.split('.');
+
+          model.set(paths[0] + '.defaultValue', null);
 
         });
 

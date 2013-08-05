@@ -55,6 +55,14 @@ KISSY.add(function(S, evaluation){
       var paths = key.split('.');
       var ret = this.attributes;
 
+      //$aa.$item.attr
+      if (paths.length > 2 && paths[1] === '$item') {
+        ret = this.item(paths[0]);
+        paths = paths.slice(2);
+
+        if(!ret) return ret;
+      }
+
       S.each(paths, function(path){
         ret = ret[path];
         if (ret === undefined) return false;
@@ -63,10 +71,17 @@ KISSY.add(function(S, evaluation){
       if (key in this.linkages) {
 
         var link = this.linkages[key];
-        var filter = this.item(link)[paths[0]];
-        ret = S.filter(ret, function(item){
-          return S.indexOf(item.value, filter) > -1;
-        });
+        var filter = this.item(link);
+        var last = paths[0];
+
+        if (filter && filter[last]) {
+          filter = filter[last];
+          ret = S.filter(ret, function(item){
+            return S.indexOf(item.value, filter) > -1;
+          });
+        } else {
+          return undefined;
+        }
       }
 
       return ret;
@@ -221,20 +236,25 @@ KISSY.add(function(S, evaluation){
         return this._setByParent(key, value, parent);
       }
 
-      if (key in this.attributes) {
+      var paths = key.split('.');
+      var attr = this.attributes;
+      var len = paths.length;
 
-        var old = this.attributes[key];
-        this.attributes[key] = value;
+      S.each(paths, function(path, i){
 
-        this.fire('change:' + key, {name: key, old: old, value: value});
+        if (path in attr && i < len - 1) {
+          attr = attr[path];
+        } else {
+          return false;
+        }
 
-      } else {
+      });
 
-        this.attributes[key] = value;
-        this.fire('add:' + key, {name: key, value: value});
+      var last = paths[len - 1];
 
-      }
+      attr[last] = value;
 
+      this.fire('change:' + paths[0], {path: paths.slice(1)});
       return this;
 
     },

@@ -13,9 +13,7 @@ KISSY.add(function(S){
       var parent = $control('parent');
 
       el.on('change', function(){
-        if (model.val)
-           return model.val(key, el.val());
-        model.set(key, this.selectedIndex, parent);
+        model.set(key, el.val(), parent);
       });
 
     });

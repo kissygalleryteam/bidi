@@ -22,21 +22,11 @@ KISSY.add(function(S, Parse){
      */
     function val(variable){
 
-      var key = variable.name;
-
       if (!variable.path.length) {
-        return model.get(key, parent);
+        return model.get(variable.name, parent);
       } else {
-
-        var base = model.item ? model.item(key): model.get(key, parent);
-        if (!base) return base;
-
-        S.some(variable.path, function(path){
-          base = base[path];
-          return !base;
-        });
-
-        return base;
+        var key = variable.name + '.' + variable.path.join('.');
+        return model.get(key, parent);
       }
 
     }

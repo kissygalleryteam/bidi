@@ -623,7 +623,7 @@ case 13: return 5;
 break;
 }
 },
-rules: [/^(?:\d+)/,/^(?:\w+)/,/^(?:\.(?=\w))/,/^(?:<=)/,/^(?:>=)/,/^(?:==)/,/^(?:>)/,/^(?:<)/,/^(?:!=)/,/^(?:&&)/,/^(?:\|\|)/,/^(?:!)/,/^(?:\s+)/,/^(?:$)/],
+rules: [/^(?:\d+)/,/^(?:[\$\w]+)/,/^(?:\.(?=[\$\w]))/,/^(?:<=)/,/^(?:>=)/,/^(?:==)/,/^(?:>)/,/^(?:<)/,/^(?:!=)/,/^(?:&&)/,/^(?:\|\|)/,/^(?:!)/,/^(?:\s+)/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13],"inclusive":true}}
 };
 return lexer;
@@ -680,21 +680,11 @@ KISSY.add('gallery/bidi/1.0/expression/index',function(S, Parse){
      */
     function val(variable){
 
-      var key = variable.name;
-
       if (!variable.path.length) {
-        return model.get(key, parent);
+        return model.get(variable.name, parent);
       } else {
-
-        var base = model.item ? model.item(key): model.get(key, parent);
-        if (!base) return base;
-
-        S.some(variable.path, function(path){
-          base = base[path];
-          return !base;
-        });
-
-        return base;
+        var key = variable.name + '.' + variable.path.join('.');
+        return model.get(key, parent);
       }
 
     }
@@ -864,6 +854,14 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       var paths = key.split('.');
       var ret = this.attributes;
 
+      //$aa.$item.attr
+      if (paths.length > 2 && paths[1] === '$item') {
+        ret = this.item(paths[0]);
+        paths = paths.slice(2);
+
+        if(!ret) return ret;
+      }
+
       S.each(paths, function(path){
         ret = ret[path];
         if (ret === undefined) return false;
@@ -872,10 +870,17 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       if (key in this.linkages) {
 
         var link = this.linkages[key];
-        var filter = this.item(link)[paths[0]];
-        ret = S.filter(ret, function(item){
-          return S.indexOf(item.value, filter) > -1;
-        });
+        var filter = this.item(link);
+        var last = paths[0];
+
+        if (filter && filter[last]) {
+          filter = filter[last];
+          ret = S.filter(ret, function(item){
+            return S.indexOf(item.value, filter) > -1;
+          });
+        } else {
+          return undefined;
+        }
       }
 
       return ret;
@@ -1030,20 +1035,25 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
         return this._setByParent(key, value, parent);
       }
 
-      if (key in this.attributes) {
+      var paths = key.split('.');
+      var attr = this.attributes;
+      var len = paths.length;
 
-        var old = this.attributes[key];
-        this.attributes[key] = value;
+      S.each(paths, function(path, i){
 
-        this.fire('change:' + key, {name: key, old: old, value: value});
+        if (path in attr && i < len - 1) {
+          attr = attr[path];
+        } else {
+          return false;
+        }
 
-      } else {
+      });
 
-        this.attributes[key] = value;
-        this.fire('add:' + key, {name: key, value: value});
+      var last = paths[len - 1];
 
-      }
+      attr[last] = value;
 
+      this.fire('change:' + paths[0], {path: paths.slice(1)});
       return this;
 
     },
@@ -1381,9 +1391,7 @@ KISSY.add('gallery/bidi/1.0/watch/select',function(S){
       var parent = $control('parent');
 
       el.on('change', function(){
-        if (model.val)
-           return model.val(key, el.val());
-        model.set(key, this.selectedIndex, parent);
+        model.set(key, el.val(), parent);
       });
 
     });
@@ -1448,7 +1456,9 @@ KISSY.add('gallery/bidi/1.0/watch/each',function(S, XTemplate){
           html = html.runtime.option.commands.each([model.get(key)], option);
           el.html(html);
 
-          model.fire('change:' + key);
+          var paths = key.split('.');
+
+          model.set(paths[0] + '.defaultValue', null);
 
         });
 
@@ -1495,7 +1505,7 @@ KISSY.add('gallery/bidi/1.0/watch/radio',function(S){
         var target = S.all(e.currentTarget);
         var val = target.val();
 
-        model.val(key, val);
+        model.set(key, val);
 
       });
 

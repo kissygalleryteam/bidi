@@ -9,8 +9,8 @@
 %%
 
 \d+     { return 'NUMBER' }
-\w+     { return 'VAR' }
-"."/\w  { return 'DOT' }
+[\$\w]+     { return 'VAR' }
+"."/[\$\w]  { return 'DOT' }
 "<="    { return yytext }
 ">="    { return yytext }
 "=="    { return yytext }

@@ -26,9 +26,9 @@
         <td><select {{watch "select: meal"}}>
             {{#each ../meals}}
               {{#if ../meal === xindex}}
-              <option value="{{price}}" selected="selected">{{mealName}}</option>
+              <option value="{{value}}" selected="selected">{{mealName}}</option>
               {{else}}
-              <option value="{{price}}">{{mealName}}</option>
+              <option value="{{value}}">{{mealName}}</option>
               {{/if}}
             {{/each}}
         </select></td>
@@ -39,7 +39,7 @@
     </tbody>
   </table>
 
-  <button {{watch "click: addSeat"}}>Reserve another seat</button>
+  <button {{watch "click: addSeat" "attr: seats.length > 5: disabled"}}>Reserve another seat</button>
 
   <h3 data-bind="visible: totalSurcharge() > 0">
     Total surcharge: $<span {{watch "text: totalSurcharge"}}></span>
@@ -94,9 +94,9 @@
           new Seat('Hanwen', 1)
         ],
         meals: [
-          { mealName: "Standard (sandwich)", price: 0 },
-          { mealName: "Premium (lobster)", price: 34.95 },
-          { mealName: "Ultimate (whole zebra)", price: 290 }
+          { mealName: "Standard (sandwich)", price: 0, value: 0 },
+          { mealName: "Premium (lobster)", price: 34.95, value: 1 },
+          { mealName: "Ultimate (whole zebra)", price: 290, value: 2 }
         ],
         totalSurcharge: function(){
 

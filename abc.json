@@ -1,13 +1,14 @@
 {
-    "name": "bidi",
-    "version": "1.0",
-    "desc": "mvvm for kissy(开发中)",
-    "cover": "",
-    "author": {
-        "name": "hanwen.sah",
-        "email": "hanwen.sah@taobao.com",
-        "page": "http://shepehrdwind.com"
-    },
-    "type": "kissy-pie",
-    "type-url": "http://abc.alibaba-inc.com/r/kissy-pie"
+    "name":"bidi",
+    "version":"1.0",
+    "desc":"mvvm for kissy(开发中)",
+    "cover":"",
+    "author":{
+    "name":"hanwen.sah",
+    "email":"hanwen.sah@taobao.com",
+    "page":"http://shepehrdwind.com"
+},
+    "type":"kissy-pie",
+    "type-url":"http://abc.alibaba-inc.com/r/kissy-pie",
+    "githubName":"shepherdwind"
 }

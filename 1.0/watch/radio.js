@@ -16,7 +16,7 @@ KISSY.add(function(S){
         var target = S.all(e.currentTarget);
         var val = target.val();
 
-        model.val(key, val);
+        model.set(key, val);
 
       });
 

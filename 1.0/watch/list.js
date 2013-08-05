@@ -25,13 +25,12 @@ KISSY.add(function(S, XTemplate){
         model.on('add:' + key, function(e){
 
           var fn = $control('fn');
-          var html = new XTemplate(fn);
           var option = {params: [e.obj], fn: fn};
 
           var json = model.toJSON();
           json['__name__'] = $control('name');
 
-          html = option.fn([e.obj, json]);
+          var html = option.fn([e.obj, json]);
           $control('el').parent().append(html);
 
           $control('view').fire('inited');

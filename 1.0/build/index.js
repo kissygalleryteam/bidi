@@ -12,6 +12,7 @@ gallery/bidi/1.0/watch/select
 gallery/bidi/1.0/watch/attr
 gallery/bidi/1.0/watch/each
 gallery/bidi/1.0/watch/radio
+gallery/bidi/1.0/watch/list
 gallery/bidi/1.0/watch/value
 gallery/bidi/1.0/watch/index
 gallery/bidi/1.0/views
@@ -844,10 +845,6 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
         return this._getByParent(key, parent);
       }
 
-      if (this.__parent__ && key in this.__parent__) {
-        return this.__parent__[key];
-      }
-
       var val = this.attributes[key]; 
 
       if (typeof val == 'function') {
@@ -871,9 +868,8 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       var ret = val[key];
 
       if (S.isFunction(ret)){
-        this.__parent__ = val;
-        ret = ret.call(this);
-        delete this.__parent__;
+        //如果在list中，函数第一个参数是，list所在的对象
+        ret = ret.call(this, parent);
       }
 
       if (this.__recode) {
@@ -959,7 +955,7 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       if (S.isArray(key)){
 
         evt = S.map(key, function(name){
-          return 'change:' + name;
+          return 'change:' + name + ' add:' + name + ' remove:' + name;
         }).join(' ');
 
       } else {
@@ -1005,6 +1001,53 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
 
       return this;
 
+    },
+
+    /**
+     * 删除集合中的一个元素
+     * @param {object} obj 集合元素
+     * @public
+     * @return this
+     */
+    remove: function(obj){
+
+      if (this.__forbidden_set) return;
+
+      var parentKey = obj.name;
+      var lists = this.get(parentKey);
+      var index;
+
+      S.some(lists, function(list, i){
+        if (list['__parent__'].id === obj.id){
+          index = i;
+          return true;
+        }
+      });
+
+      //删除元素
+      lists.splice(index, 1);
+      this.fire('remove:' + parentKey, {id: obj.id, index: index});
+
+      return this;
+    },
+
+    /**
+     * 在list中添加一个元素
+     * @param {object} obj 需要加入元素
+     * @param {string} key 需要增加的属性
+     * @public
+     */
+    add: function(obj, key){
+
+      if (this.__forbidden_set) return;
+
+      obj['__parent__'] = { id: S.guid('$id'), name: key};
+      var lists = this.get(key);
+
+      lists.push(obj);
+      this.fire('add:' + key, {obj: obj});
+
+      return this;
     },
 
     /**
@@ -1176,7 +1219,6 @@ KISSY.add('gallery/bidi/1.0/watch/text',function(S){
         var model = $control('model');
         var key = $control('key');
 
-        var val = model.get(key);
         var el = $control('el');
         var expr = model.evaluation($control);
 
@@ -1265,7 +1307,7 @@ KISSY.add('gallery/bidi/1.0/watch/click',function(S){
       var selector = $control('selector');
 
       $control('base').delegate('click', selector, function(){
-        model.get(key);
+        model.get(key, $control('parent'));
       });
 
     });
@@ -1287,8 +1329,6 @@ KISSY.add('gallery/bidi/1.0/watch/select',function(S){
       var key = $control('key');
       var el = $control('el');
       var parent = $control('parent');
-
-      //if (val) { el.val(val); }
 
       el.on('change', function(){
         if (model.val)
@@ -1414,6 +1454,64 @@ KISSY.add('gallery/bidi/1.0/watch/radio',function(S){
   }
 
 }, {
+});
+
+KISSY.add('gallery/bidi/1.0/watch/list',function(S, XTemplate){
+
+  "use strict";
+
+  function add(watch){
+
+    watch.add('list', {
+
+      init: function(){
+
+        var $control = this.$control;
+        var self = this;
+
+        var model = $control('model');
+        var key = $control('key');
+
+        model.on('remove:' + key, function(e){
+
+          var el = $control('el').parent().children();
+          var index = e.index;
+          el.item(index + 1).remove();
+
+        });
+
+        model.on('add:' + key, function(e){
+
+          var fn = $control('fn');
+          var option = {params: [e.obj], fn: fn};
+
+          var json = model.toJSON();
+          json['__name__'] = $control('name');
+
+          var html = option.fn([e.obj, json]);
+          $control('el').parent().append(html);
+
+          $control('view').fire('inited');
+
+        });
+
+      },
+
+      beforeReady: function(){
+
+        var $control = this.$control;
+        this.$html = '<{tag} class=xlist id=' + $control('id') + '></{tag}>';
+
+      }
+
+    });
+
+  }
+
+  return add;
+
+}, {
+  requires: ['xtemplate']
 });
 
 KISSY.add('gallery/bidi/1.0/watch/value',function(S){
@@ -1589,6 +1687,7 @@ KISSY.add('gallery/bidi/1.0/watch/index',function(S){
     './attr',
     './each',
     './radio',
+    './list',
     './value'
   ]
 });
@@ -1656,14 +1755,20 @@ KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch, Do){
           // XTemplate执行函数，只在block语法下需要，比如linkage、list
           fn: fn,
           // 其他参数，{{watch "text: key: argv0: argv1}}
-          argv: argv
+          argv: argv,
+          name: this.name,
+          view: this
         });
 
-        this.on('inited', function(){
+        var _init = function(){
           // dom ready
           w.$control('el', this.el.all(selector));
           w.fire('ready');
-        }, this)
+
+          this.detach('inited', _init);
+        }
+
+        this.on('inited', _init);
 
         html = w.$html || html;
 
@@ -1788,7 +1893,6 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Fo
 
     list: function(scopes, option, params, name, html){
 
-      html = '';
       var model = Views[name].model;
       var len = scopes.length - 1;
 
@@ -1797,6 +1901,8 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Fo
       var param0 = option.params[0];
       var opScopes = [0, 0].concat(scopes);
       var xcount = param0.length;
+
+      var buf = '';
 
       for (var xindex = 0; xindex < xcount; xindex++) {
         // two more variable scope for array looping
@@ -1810,12 +1916,19 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Fo
           xcount: xcount,
           xindex: xindex
         };
-        html += option.fn(opScopes);
+        buf += option.fn(opScopes);
       }
 
-      //html += option.commands.each(scopes, option);
+      //找到tag是什么,list会生成一个相同tag的dom
+      var tag = /\s*<(\w+)[\s>]/.exec(buf);
+      if (tag){
+        html = html.replace(/{tag}/g, tag[1]);
+      } else {
+        S.error('str no support tag regexper' + tag);
+      }
 
-      return html;
+      return html + buf;
+
     }
 
   };

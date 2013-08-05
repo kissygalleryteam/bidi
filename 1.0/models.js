@@ -5,6 +5,7 @@ KISSY.add(function(S, evaluation){
   function Model(obj){
 
     this.attributes = {};
+    this.linkages = {};
 
     S.each(obj, function(val, key){
       this.attributes[key] = val.slice ? val.slice(): val;
@@ -36,7 +37,7 @@ KISSY.add(function(S, evaluation){
         return this._getByParent(key, parent);
       }
 
-      var val = this.attributes[key]; 
+      var val = this._getAttr(key);
 
       if (typeof val == 'function') {
         val = val.call(this);
@@ -49,6 +50,50 @@ KISSY.add(function(S, evaluation){
       return val;
     },
 
+    _getAttr: function(key){
+
+      var paths = key.split('.');
+      var ret = this.attributes;
+
+      S.each(paths, function(path){
+        ret = ret[path];
+        if (ret === undefined) return false;
+      });
+
+      if (key in this.linkages) {
+
+        var link = this.linkages[key];
+        var filter = this.item(link)[paths[0]];
+        ret = S.filter(ret, function(item){
+          return S.indexOf(item.value, filter) > -1;
+        });
+      }
+
+      return ret;
+    },
+
+    /**
+     * 获取某个表单所对应的对象，通常，如果是一个select或者radio，一个select对应
+     * 的$values有多个，item根据select的$defaultValue所对应的对象
+     */
+    item: function(key){
+
+      var items = this.get(key).values;
+      var val = this.get(key).defaultValue;
+      var ret;
+
+      if (!items) return ret;
+
+      S.some(items, function(item){
+        if (item.value == val) {
+          ret = item;
+          return true;
+        }
+      });
+
+      return ret;
+
+    },
     /**
      * 获取key来查找，parent对象定义了key所处的id和根节点name
      * @private
@@ -259,6 +304,11 @@ KISSY.add(function(S, evaluation){
      */
     evaluation: function($control){
       return evaluation($control);
+    },
+
+    setLinkage: function(key, val){
+      this.linkages[key] = val;
+      return this;
     }
 
   });

@@ -17,8 +17,8 @@
 
   <p class="item">
     <label>退款原因: </label>
-    <select name="key1" {{watch "select: problem"}}>
-      {{#each problem}}
+    <select name="key1" {{watch "select: problem.defaultValue"}}>
+      {{#each problem.values}}
       <option value="{{value}}">{{text}}</option>
       {{/each}}
     </select>
@@ -26,19 +26,9 @@
 
   <p class="item" {{watch "class: !reasons: hide"}}>
     <label>问题描述：</label>
-    {{#watch "linkage: reasons: problem" "radio: reasons"}}
+    {{#watch "linkage: reasons.values: problem" "radio: reasons"}}
     <label>
       <input type="radio" name="name1" value="{{value}}"/>
-      {{text}}
-    </label>
-    {{/watch}}
-  </p>
-
-  <p class="item hide" {{watch "class: !subs: hide"}}>
-    <label>问题描述第三级：</label>
-    {{#watch "linkage: subs: reasons"}}
-    <label>
-      <input type="radio" name="name2" value="{{value}}"/>
       {{text}}
     </label>
     {{/watch}}
@@ -56,7 +46,7 @@
   <p class="item hide" {{watch "class: !itemSendBack: hide"}}>
     <label>退货信息</label>
     <select name="safd" {{watch "attr: !itemSendBack: disabled"}}>
-    {{#each logistics}}
+    {{#each logistics.values}}
       <option value="{{value}}">{{text}}</option>
     {{/each}}
     </select>
@@ -64,7 +54,7 @@
 
   <p class="item hide" {{watch "class: !itemSendBack: hide"}}>
     <label>退货反馈：</label>
-    {{#each feedback}}
+    {{#each feedback.values}}
     <label>
       <input type="radio" name="name" value="{{value}}" {{watch "attr: !itemSendBack: disabled"}}/>
       {{text}}
@@ -74,7 +64,7 @@
 
   <p class="item hide" {{watch "class: !reasons.jude || itemSendBack: hide"}}>
     <label>要求谁来评判: </label>
-    {{#each jude}}
+    {{#each jude.values}}
     <label>
       <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.jude: disabled"}}/>
       {{text}}
@@ -108,11 +98,11 @@
 
     S.use('gallery/bidi/1.0/index', function (S, Bidi) {
 
-      var form = Bidi.xform('form', {
+      var form = Bidi.xbind('form', {
 
         problem: {
-          $defaultValue: 2,
-          $values: [
+          defaultValue: 2,
+          values: [
             {value: 1, text: '大小尺寸不符合', reasons: [11, 12]},
             {value: 2, text: '材料面料不符合', reasons: [21, 22]},
             {value: 3, text: '工艺手艺问题', reasons: [31, 32, 33]},
@@ -122,8 +112,8 @@
         },
 
         reasons: {
-          $defaultValue: null,
-          $values: [
+          defaultValue: null,
+          values: [
             {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc", subs: [11, 12]},
             {value: 12, text: '拼接、走线不齐'},
             {value: 21, text: '材质不符', jude: true, subs: [21, 22, 12]},
@@ -137,8 +127,8 @@
         },
 
         subs: {
-          $defaultValue: null,
-          $values: [
+          defaultValue: null,
+          values: [
             {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc"},
             {value: 12, text: '拼接、走线不齐'},
             {value: 21, text: '材质不符', jude: true},
@@ -147,8 +137,8 @@
         },
 
         logistics: {
-          $defaultValue: null,
-          $values: [
+          defaultValue: null,
+          values: [
             {value: 1, text: 'EMS'},
             {value: 2, text: '申通E物流'},
             {value: 3, text: '圆通速递'},
@@ -157,8 +147,8 @@
         },
 
         jude: {
-          $defaultValue: null,
-          $values: [
+          defaultValue: null,
+          values: [
             {value: 1, text: '31名大众评审'},
             {value: 2, text: '淘宝小二评审'}
           ]
@@ -168,7 +158,7 @@
 
         feedback: {
           value: null,
-          $values: [
+          values: [
             {value: 1, text: '卖家已签收未处理'},
             {value: 2, text: '卖家拒绝签收'},
             {value: 3, text: '卖家反馈未收到货'},

@@ -162,10 +162,8 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, Form, View, Watcher){
     /**
      * 激活命令，比如Bidi.active('text'), 那么可以在模板中写 
      * {{text "key"}} == {{watch "text: key"}}
-     * @param {string|array} name * * 需要激活的命令，注册到XTemplate的自定义命
-     * 令中
+     * @param {string|array} name 需要激活的命令，注册到XTemplate的自定义命令中
      * @static
-     * @method
      */
     active: function(name){
 

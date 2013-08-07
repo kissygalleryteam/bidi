@@ -1918,7 +1918,7 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
         //添加命令
         view.template.addCommand('watch', watch);
         S.each(commands, function(fn, cmd){
-          view.tempalte.addCommand(cmd, fn);
+          view.template.addCommand(cmd, fn);
         });
 
         view.render();

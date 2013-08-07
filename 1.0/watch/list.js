@@ -16,9 +16,9 @@ KISSY.add(function(S, XTemplate){
 
         model.on('remove:' + key, function(e){
 
-          var el = $control('el').parent().children();
+          var el = $control('el').children();
           var index = e.index;
-          el.item(index + 1).remove();
+          el.item(index).remove();
 
         });
 
@@ -30,19 +30,12 @@ KISSY.add(function(S, XTemplate){
           var json = model.toJSON();
           json['__name__'] = $control('name');
 
-          var html = option.fn([e.obj, json]);
-          $control('el').parent().append(html);
+          var html = option.fn([e.obj, json]).replace(/^>/, '');
+          $control('el').append(html);
 
           $control('view').fire('inited');
 
         });
-
-      },
-
-      beforeReady: function(){
-
-        var $control = this.$control;
-        this.$html = '<{tag} class=xlist id=' + $control('id') + '></{tag}>';
 
       }
 

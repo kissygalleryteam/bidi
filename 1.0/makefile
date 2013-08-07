@@ -1,5 +1,7 @@
+ghPath = ~/code/gh-pages/bidi/
 pages:
-	cp -r demo/*.html ~/code/gh-pages/bidi/
-	cp -r ./*.js ~/code/gh-pages/bidi/
-	cp -r ./expression/* ~/code/gh-pages/bidi/expression/
-	cp -r ./watch/*.js ~/code/gh-pages/bidi/watch/
+	cp -r demo/*.html ${ghPath}
+	cp -r ./*.js ${ghPath}
+	cp -r ./expression/* ${ghPath}expression/
+	cp -r ./watch/*.js ${ghPath}watch/
+	cd ${ghPath} && make publish

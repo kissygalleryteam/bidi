@@ -19,8 +19,14 @@ KISSY.add(function(S, evaluation){
     /**
      * @private
      */
-    _isFunc: function(key){
-      var val = this.attributes[key];
+    _isFunc: function(key, parent){
+      var val;
+      if (parent) {
+        val = this._getParent(parent)[key];
+      } else {
+        val = this._getAttr(key);
+      }
+
       return S.isFunction(val);
     },
 
@@ -156,7 +162,7 @@ KISSY.add(function(S, evaluation){
 
     getRelated: function(key, parent){
 
-      if (this._isFunc(key)) {
+      if (this._isFunc(key, parent)) {
 
         this.__recode = true;
         this.__getter = [];

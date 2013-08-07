@@ -4,7 +4,6 @@ combined files :
 gallery/bidi/1.0/expression/parse
 gallery/bidi/1.0/expression/index
 gallery/bidi/1.0/models
-gallery/bidi/1.0/form
 gallery/bidi/1.0/watch/text
 gallery/bidi/1.0/watch/class
 gallery/bidi/1.0/watch/click
@@ -818,8 +817,14 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
     /**
      * @private
      */
-    _isFunc: function(key){
-      var val = this.attributes[key];
+    _isFunc: function(key, parent){
+      var val;
+      if (parent) {
+        val = this._getParent(parent)[key];
+      } else {
+        val = this._getAttr(key);
+      }
+
       return S.isFunction(val);
     },
 
@@ -955,7 +960,7 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
 
     getRelated: function(key, parent){
 
-      if (this._isFunc(key)) {
+      if (this._isFunc(key, parent)) {
 
         this.__recode = true;
         this.__getter = [];
@@ -1141,130 +1146,6 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
   ]
 });
 
-KISSY.add('gallery/bidi/1.0/form',function(S, Event, Model){
-
-  "use strict";
-
-  function Form(obj){
-
-    Model.apply(this, arguments);
-
-    return this;
-  }
-
-  S.augment(Form, Model, {
-
-    get: function(key){ 
-
-      var val = this.attributes[key]; 
-
-      var type = KISSY.type(val);
-
-      if (type == 'function') {
-
-        val = val.call(this);
-
-      } else if (type == 'object') {
-
-
-        if (val['$filter']) {
-
-          var item = this.item(val['$filter']);
-          var filter = item && item[key];
-          var ret;
-
-          if (filter) {
-            ret = S.filter(val['$values'], function(item){
-              return S.indexOf(item.value, filter) > -1;
-            });
-          }
-
-          val = ret;
-
-        } else {
-
-          val = val['$values'];
-
-        }
-
-
-      }
-
-      if (this.__recode) {
-        this.__getter.push(key);
-      }
-
-      return val;
-    },
-
-    /**
-     * 获取某个表单所对应的对象，通常，如果是一个select或者radio，一个select对应
-     * 的$values有多个，item根据select的$defaultValue所对应的对象
-     */
-    item: function(key){
-
-      var items = this.get(key);
-      var val = this.val(key);
-      var ret;
-
-      if (!items) return ret;
-
-      S.some(items, function(item){
-        if (item.value == val) {
-          ret = item;
-          return true;
-        }
-      });
-
-      return ret;
-
-    },
-
-    set: function(key, value){
-
-      if (key in this.attributes) {
-
-        var old = this.attributes[key];
-        this.attributes[key] = value;
-
-        this.fire('change:' + key, {name: key, old: old, value: value});
-
-      } else {
-
-        this.attributes[key] = value;
-        this.fire('change:' + key, {name: key, value: value});
-
-      }
-
-      return this;
-
-    },
-
-    val: function(key, val){
-
-      if (val) {
-        this.attributes[key].$defaultValue = val;
-        this.fire('change:' + key);
-        return this;
-      } else {
-        return this.attributes[key].$defaultValue;
-      }
-
-    },
-
-    setLinkage: function(key, val){
-      this.attributes[key]['$filter'] = val;
-      return this;
-    }
-
-  });
-
-  return Form;
-
-}, {
-  requires: ['event', './models']
-});
-
 KISSY.add('gallery/bidi/1.0/watch/text',function(S){
 
   "use strict";
@@ -1339,13 +1220,15 @@ KISSY.add('gallery/bidi/1.0/watch/class',function(S){
 
       var expr = model.evaluation($control);
 
-      model.change(expr.related, function(e){
+      model.change(expr.related, change);
 
+      function change(){
         var el = $control('el');
         var fn = model.evaluation($control).val ? 'addClass': 'removeClass';
         el[fn](classname);
+      }
 
-      });
+      change();
 
     });
 
@@ -1534,9 +1417,9 @@ KISSY.add('gallery/bidi/1.0/watch/list',function(S, XTemplate){
 
         model.on('remove:' + key, function(e){
 
-          var el = $control('el').parent().children();
+          var el = $control('el').children();
           var index = e.index;
-          el.item(index + 1).remove();
+          el.item(index).remove();
 
         });
 
@@ -1548,19 +1431,12 @@ KISSY.add('gallery/bidi/1.0/watch/list',function(S, XTemplate){
           var json = model.toJSON();
           json['__name__'] = $control('name');
 
-          var html = option.fn([e.obj, json]);
-          $control('el').parent().append(html);
+          var html = option.fn([e.obj, json]).replace(/^>/, '');
+          $control('el').append(html);
 
           $control('view').fire('inited');
 
         });
-
-      },
-
-      beforeReady: function(){
-
-        var $control = this.$control;
-        this.$html = '<{tag} class=xlist id=' + $control('id') + '></{tag}>';
 
       }
 
@@ -1752,7 +1628,7 @@ KISSY.add('gallery/bidi/1.0/watch/index',function(S){
   ]
 });
 
-KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch, Do){
+KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch){
 
   "use strict";
 
@@ -1779,7 +1655,9 @@ KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch, Do){
       var json = this.model.toJSON();
       json['__name__'] = this.name;
 
-      this.el.html(this.template.render(json));
+      var html = this.template.render(json);
+      html = html.replace(/>\s+>>><<</g, '');
+      this.el.html(html);
 
       this.fire('inited');
 
@@ -1858,7 +1736,7 @@ KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch, Do){
  * @author hanwen.sah<hanwen.sah@taobao.com>
  * @module bidi
  **/
-KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Form, View, Watcher){
+KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, View, Watcher){
 
   "use strict";
 
@@ -1976,18 +1854,10 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Fo
           xcount: xcount,
           xindex: xindex
         };
-        buf += option.fn(opScopes);
+        buf += option.fn(opScopes).replace(/^>/, '');
       }
 
-      //找到tag是什么,list会生成一个相同tag的dom
-      var tag = /\s*<(\w+)[\s>]/.exec(buf);
-      if (tag){
-        html = html.replace(/{tag}/g, tag[1]);
-      } else {
-        S.error('str no support tag regexper' + tag);
-      }
-
-      return html + buf;
+      return ' >>><<<' + html + '>' + buf;
 
     }
 
@@ -2005,12 +1875,9 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Fo
       return watch(scopes, option);
     }
 
-    XTemplate.addCommand(name, fn);
-    commands[name] = true;
+    commands[name] = fn;
 
   }
-
-  XTemplate.addCommand('watch', watch);
 
   var Bidi = {
 
@@ -2035,19 +1902,26 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Fo
     },
 
     xbind: function(name, obj){
-      Views[name] = new View(name, new Model(obj));
-    },
 
-    xform: function(name, obj){
-      Views[name] = new View(name, new Form(obj));
-      return Views[name];
+      Views[name] = new View(name, new Model(obj));
+      return View[name];
+
     },
 
     init: function(){
 
       $(".bidi-viewer").each(function(el){
+
         var name = el.attr('data-view');
-        Views[name].setEl(el).render();
+        var view = Views[name].setEl(el);
+
+        //添加命令
+        view.template.addCommand('watch', watch);
+        S.each(commands, function(fn, cmd){
+          view.tempalte.addCommand(cmd, fn);
+        });
+
+        view.render();
       });
 
     },
@@ -2072,7 +1946,6 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Fo
     'base',
     'xtemplate',
     './models',
-    './form',
     './views',
     './watch/index'
   ]

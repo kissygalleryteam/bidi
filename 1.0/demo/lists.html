@@ -4,6 +4,9 @@
   <meta charset="utf-8"/>
   <title>demo lists</title>
   <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <style type="text/css">
+  .hide { display: none; }
+  </style>
 </head>
 <body>
 
@@ -41,8 +44,8 @@
 
   <button {{watch "click: addSeat" "attr: seats.length > 5: disabled"}}>Reserve another seat</button>
 
-  <h3 data-bind="visible: totalSurcharge() > 0">
-    Total surcharge: $<span {{watch "text: totalSurcharge"}}></span>
+  <h3 {{watch "class: totalSurcharge <= 0: hide"}}>
+    Total surcharge: <span {{watch "text: totalSurcharge: formattedPrice"}}></span>
   </h3>
   </script>
 

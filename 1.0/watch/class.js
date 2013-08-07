@@ -13,13 +13,15 @@ KISSY.add(function(S){
 
       var expr = model.evaluation($control);
 
-      model.change(expr.related, function(e){
+      model.change(expr.related, change);
 
+      function change(){
         var el = $control('el');
         var fn = model.evaluation($control).val ? 'addClass': 'removeClass';
         el[fn](classname);
+      }
 
-      });
+      change();
 
     });
 

@@ -1,4 +1,4 @@
-KISSY.add(function(S, Event, XTemplate, Watch, Do){
+KISSY.add(function(S, Event, XTemplate, Watch){
 
   "use strict";
 
@@ -25,7 +25,9 @@ KISSY.add(function(S, Event, XTemplate, Watch, Do){
       var json = this.model.toJSON();
       json['__name__'] = this.name;
 
-      this.el.html(this.template.render(json));
+      var html = this.template.render(json);
+      html = html.replace(/>\s+>>><<</g, '');
+      this.el.html(html);
 
       this.fire('inited');
 

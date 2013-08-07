@@ -1,0 +1,110 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>demo lists</title>
+  <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <style type="text/css">
+  .hide { display: none; }
+  .selected { font-weight: bold; color: blue; }
+  </style>
+</head>
+<body>
+
+<h2>demo标题</h2>
+
+<div class="bidi-viewer" data-view="webmail">
+
+  <script type="text/xtemplate">
+  <!-- Folders -->
+  <ul class="folders" {{#watch "list: folders"}}>
+    <li {{watch "class: isSeleted: selected" "click: goFold"}}>{{text}}</li>
+    {{/watch}}
+  </ul>
+
+  <!-- Mails grid -->
+  <table class="mails" {{watch "class: mails.length: hide"}}>
+    <thead><tr><th>From</th><th>To</th><th>Subject</th><th>Date</th></tr></thead>
+    <tbody {{#watch "list: mails"}}>
+      <tr {{watch "click: goToMail"}}>
+        <td>{{from}}</td>
+        <td>{{to}}</td>
+        <td>{{subject}}</td>
+        <td>{{date}}</td>
+      </tr>
+    {{/watch}}
+    </tbody>
+  </table>
+
+  <!-- Chosen mail -->
+  <div class="viewMail" {{watch "class: !choosedMail: hide"}}>
+    {{#watch "with: choosedMail"}}
+    <div class="mailInfo">
+      <h1>{{subject}}</h1>
+      <p><label>From</label>: <span>{{form}}</span></p>
+      <p><label>To</label>: <span>{{to}}</span>/</p>
+      <p><label>Date</label>: <span>{{date}}</span></p>
+    </div>
+    <p class="message">{{messageContent}}</p>
+    {{/watch}}
+  </div>
+  </script>
+
+</div>
+
+<script>
+    var S = KISSY;
+    if (S.Config.debug) {
+      var srcPath = "../../../";
+      S.config({
+        packages:[
+          {
+            name: "gallery",
+            path: srcPath,
+            charset: "utf-8",
+            ignorePackageNameInUri: true
+          }
+        ]
+      });
+    }
+
+    S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+
+      function Folder(text){
+        this.text = text;
+      }
+
+      S.augment(Folder, {
+
+        goFold: function(folder){
+          var text = this.get('text' ,folder);
+          this.set('folder', text);
+        },
+
+        isSeleted: function(folder){
+          var text = this.get('text' ,folder);
+          return text == this.get('folder');
+        }
+
+      });
+
+      Bidi.xbind('webmail', {
+        folders: [
+          new Folder('Index'),
+          new Folder('Archive'),
+          new Folder('Sent'),
+          new Folder('Spam')
+        ],
+        mails: [],
+        choosedMail: false,
+        folder: 'Index'
+      });
+
+      Bidi.init();
+
+    })
+</script>
+
+</body>
+</html>

@@ -1273,6 +1273,9 @@ KISSY.add('gallery/bidi/1.0/watch/select',function(S){
       var el = $control('el');
       var parent = $control('parent');
 
+      var expr = model.evaluation($control);
+      el.val(expr.val);
+
       el.on('change', function(){
         model.set(key, el.val(), parent);
       });
@@ -1814,14 +1817,15 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
 
       html = html || '';
       var model = Views[name].model;
-      var len = scopes.length - 1;
 
       //重新计算，这时候model的value会有改变
-      scopes[len][params[1]] = model.get(params[1]);
+      scopes[0]['$$linkage'] = model.get(params[1]);
 
       //调用XTemplate的each命令
-      option.params[0] = scopes[0][params[1]];
+      option.params[0] = scopes[0]['$$linkage'];
       html += option.commands.each(scopes, option);
+
+      delete scopes['$$linkage'];
 
       html += '</span>';
 

@@ -81,14 +81,15 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, View, Watcher){
 
       html = html || '';
       var model = Views[name].model;
-      var len = scopes.length - 1;
 
       //重新计算，这时候model的value会有改变
-      scopes[len][params[1]] = model.get(params[1]);
+      scopes[0]['$$linkage'] = model.get(params[1]);
 
       //调用XTemplate的each命令
-      option.params[0] = scopes[0][params[1]];
+      option.params[0] = scopes[0]['$$linkage'];
       html += option.commands.each(scopes, option);
+
+      delete scopes['$$linkage'];
 
       html += '</span>';
 

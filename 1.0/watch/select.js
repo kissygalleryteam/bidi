@@ -12,6 +12,9 @@ KISSY.add(function(S){
       var el = $control('el');
       var parent = $control('parent');
 
+      var expr = model.evaluation($control);
+      el.val(expr.val);
+
       el.on('change', function(){
         model.set(key, el.val(), parent);
       });

@@ -18,16 +18,18 @@
 
   <script type="text/xtemplate">
   <!-- Folders -->
-  <ul class="folders" {{#watch "list: folders"}}>
+  <ul class="folders">
+    {{#watch "list: folders"}}
     <li {{watch "class: isSeleted: selected" "click: goFold"}}>{{text}}</li>
     {{/watch}}
   </ul>
 
   <!-- Mails grid -->
-  <table class="mails" {{watch "class: mails.length: hide"}}>
+  <table class="mails" {{watch "class: !mails.length: hide"}}>
     <thead><tr><th>From</th><th>To</th><th>Subject</th><th>Date</th></tr></thead>
-    <tbody {{#watch "list: mails"}}>
-      <tr {{watch "click: goToMail"}}>
+    <tbody>
+      {{#watch "list: mails"}}
+      <tr {{watch "click: $root.goToMail"}}>
         <td>{{from}}</td>
         <td>{{to}}</td>
         <td>{{subject}}</td>
@@ -69,7 +71,7 @@
       });
     }
 
-    S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+    S.use('gallery/bidi/1.0/index, ajax, json', function (S, Bidi) {
 
       function Folder(text){
         this.text = text;
@@ -80,6 +82,7 @@
         goFold: function(folder){
           var text = this.get('text' ,folder);
           this.set('folder', text);
+          showMails(text);
         },
 
         isSeleted: function(folder){
@@ -89,19 +92,42 @@
 
       });
 
-      Bidi.xbind('webmail', {
-        folders: [
+      var M = function(){
+
+        this.folders = [
           new Folder('Index'),
           new Folder('Archive'),
           new Folder('Sent'),
           new Folder('Spam')
-        ],
-        mails: [],
-        choosedMail: false,
-        folder: 'Index'
+        ];
+
+        this.mails = [];
+        this.choosedMail = false;
+
+        this.folder = 'Index';
+
+      };
+
+      S.augment(M, {
+        goToMail: function(mail){
+          console.log(this.get(null, mail))
+        }
       });
 
+      var view = Bidi.xbind('webmail', new M); 
+
+      var model = view.model;
+
       Bidi.init();
+
+      showMails('Index');
+
+      function showMails(folder){
+        S.io.get('./webmail/' + folder + '.htm').then(function(argv){
+          var mails = eval(argv[0]);
+          model.set('mails', mails);
+        });
+      }
 
     })
 </script>

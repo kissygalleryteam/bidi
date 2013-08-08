@@ -2,14 +2,29 @@ KISSY.add(function(S, evaluation){
 
   "use strict";
 
-  function Model(obj){
+  function Model(obj, augment){
 
-    this.attributes = {};
+    var attributes;
+
+    function Attr(){}
+
+    if (augment) {
+
+      S.augment(Attr, augment);
+
+      attributes = new Attr();
+      S.mix(attributes, obj);
+
+    } else {
+
+      attributes = obj;
+
+    }
+
+    this.attributes = attributes;
+
     this.linkages = {};
-
-    S.each(obj, function(val, key){
-      this.attributes[key] = val.slice ? val.slice(): val;
-    }, this);
+    this.lists = {};
 
     return this;
   }
@@ -28,6 +43,10 @@ KISSY.add(function(S, evaluation){
       }
 
       return S.isFunction(val);
+    },
+
+    setLists: function(key){
+      this.lists[key] = true;
     },
 
     /**
@@ -56,10 +75,10 @@ KISSY.add(function(S, evaluation){
       return val;
     },
 
-    _getAttr: function(key){
+    _getAttr: function(key, base){
 
       var paths = key.split('.');
-      var ret = this.attributes;
+      var ret = base || this.attributes;
 
       //$aa.$item.attr
       if (paths.length > 2 && paths[1] === '$item') {
@@ -121,8 +140,13 @@ KISSY.add(function(S, evaluation){
      */
     _getByParent: function(key, parent){
 
-      var val = this._getParent(parent);
-      var ret = val[key];
+      var ret;
+      if (key && key.indexOf('$root.') === 0) {
+        ret = this._getAttr(key.slice(6));
+      } else {
+        var val = this._getParent(parent);
+        ret = key !== null? this._getAttr(key, val): val;
+      }
 
       if (S.isFunction(ret)){
         //如果在list中，函数第一个参数是，list所在的对象
@@ -189,7 +213,11 @@ KISSY.add(function(S, evaluation){
       this.__forbidden_set = true;
 
       S.each(this.attributes, function(val, key){
-        json[key] = this.get(key);
+
+        if (this.attributes.hasOwnProperty(key)) {
+          json[key] = this.get(key);
+        }
+
       }, this); 
 
       delete this.__forbidden_set;
@@ -260,9 +288,19 @@ KISSY.add(function(S, evaluation){
 
       attr[last] = value;
 
-      this.fire('change:' + paths[0], {path: paths.slice(1)});
+      //如果是list，给每个元素增加一个属性
+      if (key in this.lists) this._addToken(key, value);
+
+      this.fire('change:' + paths[0], {path: paths.slice(1), val: value});
       return this;
 
+    },
+
+    //增加parent的标志
+    _addToken: function(key, lists){
+      S.each(lists, function(list){
+        list['__parent__'] = { name: key, id: S.guid('$id') };
+      })
     },
 
     /**

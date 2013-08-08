@@ -62,7 +62,13 @@ KISSY.add(function(S, Parse){
     if (!ast.operator) {
 
       if (ast.name) {
-        ret = ret.concat(model.getRelated(ast.name, parent));
+
+        var str = ast.name;
+
+        if (ast.path.length)
+          str += '.' + ast.path.join('.');
+
+        ret = ret.concat(model.getRelated(str, parent));
       }
 
     } else {

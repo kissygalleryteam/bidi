@@ -12,7 +12,7 @@
 <div class="bidi-viewer" data-view="user">
   <script type="text/xtemplate">
     <p>hello, I am <strong {{text "fullName"}}></strong></p>
-    <p>hello, I am <strong {{text "firstName"}}></strong></p>
+    <p>hello, I am <span {{text "firstName"}}></strong></p>
     First Name: <input {{value "firstName"}}/><br>
     Last Name: <input {{value "lastName"}}/>
     <button {{click "capitalizeLastName"}}>Go caps</button>

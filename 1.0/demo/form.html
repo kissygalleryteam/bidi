@@ -17,11 +17,15 @@
 
   <p class="item">
     <label>退款原因: </label>
-    <select name="key1" {{watch "select: problem.defaultValue"}}>
+    <span {{class "isEdit: hide"}}>
+      <em {{text "problem.$item.text"}}></em>
+    </span>
+    <select name="key1" {{watch "select: problem.defaultValue" "class: !isEdit: hide"}}>
       {{#each problem.values}}
       <option value="{{value}}">{{text}}</option>
       {{/each}}
     </select>
+      <a href="#nowhere" {{click "editable"}}>修改</a>
   </p>
 
   <p class="item" {{watch "class: !reasons.values: hide"}}>
@@ -72,6 +76,8 @@
     {{/each}}
   </p>
 
+  <p {{text "realMax"}}></p>
+
   <p class="item hide" {{watch "class: !reasons.$item.jude || itemSendBack: hide"}}>
     <label>要求谁来评判: </label>
     {{#each jude.values}}
@@ -86,6 +92,10 @@
     <label>联系手机：
     <input type="text" {{watch "value: phone"}}/>
     </label>
+  </p>
+
+  <p class="item">
+  <input type="button" value="提交" {{click "submit"}}/>
   </p>
   </script>
 </div>
@@ -107,6 +117,8 @@
     }
 
     S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+
+      Bidi.active(['text', 'click', 'class']);
 
       var form = Bidi.xbind('form', {
 
@@ -174,6 +186,41 @@
             {value: 3, text: '卖家反馈未收到货'},
             {value: 4, text: '退货地址不详细'}
           ]
+        },
+
+        editable: function(){
+          var edit = !this.get('isEdit');
+          this.set('isEdit', edit);
+        },
+
+        refundMoney: {
+
+          label: "需要退款金额",
+          required: 1,
+          value: "",
+          max: "155",
+          min: "0",
+          postage: "10",
+          isWrite: true
+
+        }
+      }, {
+
+        realMax:  function(){
+
+          var isSevenDayReason = Number(this.get('problem.defaultValue')) == 3;
+          var max = this.get('refundMoney.max');
+
+          if(!isSevenDayReason){
+            return max;
+          } else {
+            var postage = this.get('refundMoney.postage');
+            return max - postage;
+          }
+        },
+
+        submit: function(){
+          alert('submit it');
         }
 
       });

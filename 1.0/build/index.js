@@ -12,6 +12,7 @@ gallery/bidi/1.0/watch/attr
 gallery/bidi/1.0/watch/each
 gallery/bidi/1.0/watch/radio
 gallery/bidi/1.0/watch/list
+gallery/bidi/1.0/watch/render
 gallery/bidi/1.0/watch/value
 gallery/bidi/1.0/watch/index
 gallery/bidi/1.0/views
@@ -719,7 +720,13 @@ KISSY.add('gallery/bidi/1.0/expression/index',function(S, Parse){
     if (!ast.operator) {
 
       if (ast.name) {
-        ret = ret.concat(model.getRelated(ast.name, parent));
+
+        var str = ast.name;
+
+        if (ast.path.length)
+          str += '.' + ast.path.join('.');
+
+        ret = ret.concat(model.getRelated(str, parent));
       }
 
     } else {
@@ -800,14 +807,29 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
 
   "use strict";
 
-  function Model(obj){
+  function Model(obj, augment){
 
-    this.attributes = {};
+    var attributes;
+
+    function Attr(){}
+
+    if (augment) {
+
+      S.augment(Attr, augment);
+
+      attributes = new Attr();
+      S.mix(attributes, obj);
+
+    } else {
+
+      attributes = obj;
+
+    }
+
+    this.attributes = attributes;
+
     this.linkages = {};
-
-    S.each(obj, function(val, key){
-      this.attributes[key] = val.slice ? val.slice(): val;
-    }, this);
+    this.lists = {};
 
     return this;
   }
@@ -826,6 +848,10 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       }
 
       return S.isFunction(val);
+    },
+
+    setLists: function(key){
+      this.lists[key] = true;
     },
 
     /**
@@ -854,10 +880,10 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       return val;
     },
 
-    _getAttr: function(key){
+    _getAttr: function(key, base){
 
       var paths = key.split('.');
-      var ret = this.attributes;
+      var ret = base || this.attributes;
 
       //$aa.$item.attr
       if (paths.length > 2 && paths[1] === '$item') {
@@ -919,8 +945,13 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
      */
     _getByParent: function(key, parent){
 
-      var val = this._getParent(parent);
-      var ret = val[key];
+      var ret;
+      if (key && key.indexOf('$root.') === 0) {
+        ret = this._getAttr(key.slice(6));
+      } else {
+        var val = this._getParent(parent);
+        ret = key !== null? this._getAttr(key, val): val;
+      }
 
       if (S.isFunction(ret)){
         //如果在list中，函数第一个参数是，list所在的对象
@@ -987,7 +1018,11 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       this.__forbidden_set = true;
 
       S.each(this.attributes, function(val, key){
-        json[key] = this.get(key);
+
+        if (this.attributes.hasOwnProperty(key)) {
+          json[key] = this.get(key);
+        }
+
       }, this); 
 
       delete this.__forbidden_set;
@@ -1058,9 +1093,19 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
 
       attr[last] = value;
 
-      this.fire('change:' + paths[0], {path: paths.slice(1)});
+      //如果是list，给每个元素增加一个属性
+      if (key in this.lists) this._addToken(key, value);
+
+      this.fire('change:' + paths[0], {path: paths.slice(1), val: value});
       return this;
 
+    },
+
+    //增加parent的标志
+    _addToken: function(key, lists){
+      S.each(lists, function(list){
+        list['__parent__'] = { name: key, id: S.guid('$id') };
+      })
     },
 
     /**
@@ -1114,12 +1159,13 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
      * @private
      */
     _setByParent: function(key, value, parent){
+
       var o = this._getParent(parent);
       if (o && key in o) {
         o[key] = value;
       }
-      this.fire('change:' + parent.name + ':' + parent.id);
-      this.fire('change:' + parent.name);
+
+      this.fire('change:' + parent.name, { $item: parent.id });
     },
 
     /**
@@ -1441,6 +1487,88 @@ KISSY.add('gallery/bidi/1.0/watch/list',function(S, XTemplate){
 
         });
 
+        this._bindChange();
+      },
+
+      _bindChange: function(){
+
+        var $control = this.$control;
+        var model = $control('model');
+        var key = $control('key');
+
+        model.change(key, function(e){
+
+          if (e.$item) return;
+
+          var fn = $control('fn');
+          var option = {params: [e.val], fn: fn};
+
+          var json = model.toJSON();
+          json['__name__'] = $control('name');
+
+          var html = new XTemplate(fn);
+          html = html.runtime.option.commands.each([e.val, json], option);
+
+          $control('el').html(html);
+          $control('view').fire('inited');
+
+        });
+
+      },
+
+      beforeReady: function(){
+        var $control = this.$control();
+        var model = $control.model;
+        model.setLists($control.key);
+      }
+
+    });
+
+  }
+
+  return add;
+
+}, {
+  requires: ['xtemplate']
+});
+
+KISSY.add('gallery/bidi/1.0/watch/render',function(S, XTemplate){
+
+  "use strict";
+
+  function add(watch){
+
+    watch.add('render', {
+
+      init: function(){
+
+        var $control = this.$control;
+        var model = $control('model');
+        var key = $control('key');
+
+        model.change(key, function(e){
+
+          if (e.$item) return;
+
+          var fn = $control('fn');
+          var option = {params: [e.val], fn: fn};
+
+          var json = model.toJSON();
+          json['__name__'] = $control('name');
+
+          var html = option.fn([e.val, json]);
+
+          $control('el').html(html);
+          $control('view').fire('inited');
+
+        });
+
+      },
+
+      beforeReady: function(){
+        //var $control = this.$control();
+        //var model = $control.model;
+        //model.setLists($control.key);
       }
 
     });
@@ -1627,6 +1755,7 @@ KISSY.add('gallery/bidi/1.0/watch/index',function(S){
     './each',
     './radio',
     './list',
+    './render',
     './value'
   ]
 });
@@ -1833,6 +1962,23 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
 
     },
 
+    render: function(scopes, option, params, name, html){
+
+      var model = Views[name].model;
+      var len = scopes.length - 1;
+
+      option.params[0] = scopes[0][params[1]];
+
+      var param0 = option.params[0];
+      var opScopes = [param0, scopes];
+
+      var buf = option.fn(opScopes).replace(/^>/, '');
+
+      return ' >>><<<' + html + '>' + buf;
+
+
+    },
+
     list: function(scopes, option, params, name, html){
 
       var model = Views[name].model;
@@ -1863,7 +2009,23 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
 
       return ' >>><<<' + html + '>' + buf;
 
-    }
+    },
+
+    with: function(scopes, option, params, name, html){
+
+      var model = Views[name].model;
+      var len = scopes.length - 1;
+
+      option.params[0] = scopes[0][params[1]];
+
+      var param0 = option.params[0];
+      var opScopes = [param0].concat(scopes);
+
+      var buf = option.fn(opScopes).replace(/^>/, '');
+
+      return ' >>><<<' + html + '>' + buf;
+
+    },
 
   };
 
@@ -1905,10 +2067,10 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
 
     },
 
-    xbind: function(name, obj){
+    xbind: function(name, obj, augment){
 
-      Views[name] = new View(name, new Model(obj));
-      return View[name];
+      Views[name] = new View(name, new Model(obj, augment));
+      return Views[name];
 
     },
 

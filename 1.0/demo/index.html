@@ -4,19 +4,24 @@
   <meta charset="utf-8"/>
   <title>demo标题</title>
   <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.css">
+  <style type="text/css">
+  .hide { display: none; }
+  </style>
 </head>
 <body>
 
-<h2>demo标题</h2>
-
-<div class="bidi-viewer" data-view="user">
-  <script type="text/xtemplate">
-    <p>hello, I am <strong {{text "fullName"}}></strong></p>
-    <p>hello, I am <span {{text "firstName"}}></strong></p>
-    First Name: <input {{value "firstName"}}/><br>
-    Last Name: <input {{value "lastName"}}/>
-    <button {{click "capitalizeLastName"}}>Go caps</button>
-  </script>
+<div class="container">
+  <div class="bidi-viewer panel panel-primary" data-view="user">
+    <script type="text/xtemplate">
+      <div class="panel-heading">示例1,简单情况</div>
+      <p>hello, I am <strong {{text "fullName"}}></strong></p>
+      <p>hello, I am <span {{text "firstName"}}></strong></p>
+      First Name: <input {{value "firstName"}}/><br>
+      Last Name: <input {{value "lastName"}}/>
+      <button {{click "capitalizeLastName"}}>Go caps</button>
+    </script>
+  </div>
 </div>
 
 <script>
@@ -50,10 +55,447 @@
         }
       });
 
-      Bidi.init();
-
     })
 </script>
+
+<div class="container">
+  <div class="bidi-viewer panel panel-primary" data-view="form">
+    <script type="text/xtemplte">
+
+<div class="panel-heading">表单示例</div>
+  <form class="form-horizontal" action="#">
+
+    <div class="form-group">
+      <label class="col-lg-2 control-label">退款原因: </label>
+      <div class="col-lg-10">
+        <p class="form-control-static">
+          <span {{class "isEdit: hide"}}>
+            <em {{text "problem.$item.text"}}></em>
+          </span>
+          <select name="key1" {{watch "select: problem.defaultValue" "class: !isEdit: hide"}}>
+            {{#each problem.values}}
+            <option value="{{value}}">{{text}}</option>
+            {{/each}}
+          </select>
+          <a href="#nowhere" {{click "editable"}}>修改</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group" {{watch "class: !reasons.values: hide"}}>
+      <label class="col-lg-2 control-label">问题描述:</label>
+      <div class="col-lg-10">
+        {{#watch "linkage: reasons.values: problem" "radio: reasons.defaultValue"}}
+        <label class="radio-inline">
+          <input type="radio" name="name1" value="{{value}}"/>
+          {{text}}
+        </label>
+        {{/watch}}
+      </div>
+    </div>
+
+    <div class="form-group hide" {{watch "class: !subs.values: hide"}}>
+      <label class="col-lg-2 control-label">问题描述第三级:</label>
+      <div class="col-lg-10">
+      {{#watch "linkage: subs.values: reasons"}}
+      <label class="radio-inline">
+        <input type="radio" name="name2" value="{{value}}"/>
+        {{text}}
+      </label>
+      {{/watch}}
+      </div>
+    </div>
+
+    <p class="form-group">
+      <label class="col-lg-2 control-label">货物当前状态:</label>
+      <span class="col-lg-10">
+        <label class="radio-inline"><input type="radio" name="status" value="1" />未寄回商品</label>
+        <label class="radio-inline"><input type="radio" name="status" value="2" {{watch "value: itemSendBack"}}/>已寄回商品</label>
+        <span class="label label-warning hide" {{watch "class: !itemSendBack: hide"}}>亲，没得到卖家同意，请不要退货，以免给您带来损失</span>
+      </span>
+    </p>
+
+    <div class="form-group hide" {{watch "class: !itemSendBack: hide"}}>
+      <label class="col-lg-2 control-label">退货信息:</label>
+
+      <div class="col-lg-10">
+        <p class="form-control-static">
+        <select name="safd" {{watch "attr: !itemSendBack: disabled"}}>
+        {{#each logistics.values}}
+          <option value="{{value}}">{{text}}</option>
+        {{/each}}
+        </select>
+        退款额度<span class="label label-info" {{text "realMax"}}></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group hide" {{watch "class: !itemSendBack: hide"}}>
+      <label class="col-lg-2 control-label">退货反馈:</label>
+      <p class="col-lg-10">
+      {{#each feedback.values}}
+      <label class="radio-inline">
+        <input type="radio" name="name" value="{{value}}" {{watch "attr: !itemSendBack: disabled"}}/>
+        {{text}}
+      </label>
+      {{/each}}
+      </p>
+    </div>
+
+
+    <div class="form-group hide" {{watch "class: !reasons.$item.jude || itemSendBack: hide"}}>
+      <label class="col-lg-2 control-label">要求谁来评判: </label>
+      
+      <p class="col-lg-10">
+      {{#each jude.values}}
+      <label class="radio-inline">
+        <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.$item.jude: disabled"}}/>
+        {{text}}
+      </label>
+      {{/each}}
+      </p>
+    </div>
+
+    <div class="form-group">
+      <label class="col-lg-2 control-label">联系手机:</label>
+      <p class="col-lg-10 form-control-static">
+        <input type="text" {{watch "value: phone"}}/>
+      </p>
+    </div>
+
+    <div class="form-group">
+      <p class="col-lg-offset-2 col-lg-10"">
+      <input type="button" value="提交" class="btn btn-default" {{click "submit"}}/>
+      </p>
+    </div>
+
+    </form>
+    </script>
+  </div>
+
+</div>
+
+<script type="text/javascript">
+S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+
+  Bidi.active(['text', 'click', 'class']);
+
+  var form = Bidi.xbind('form', {
+
+    problem: {
+      defaultValue: 2,
+      values: [
+        {value: 1, text: '大小尺寸不符合', reasons: [11, 12]},
+        {value: 2, text: '材料面料不符合', reasons: [21, 22]},
+        {value: 3, text: '工艺手艺问题', reasons: [31, 32, 33]},
+        {value: 4, text: '颜色、款式、图案描述不符', reasons: [44, 45]},
+        {value: 5, text: '颜色、款式、图案描述不符'}
+      ],
+    },
+
+    reasons: {
+      defaultValue: null,
+      values: [
+        {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc", subs: [11, 12]},
+        {value: 12, text: '拼接、走线不齐'},
+        {value: 21, text: '材质不符', jude: true, subs: [21, 22, 12]},
+        {value: 22, text: '严重缩水、褪色、起球、掉毛'},
+        {value: 31, text: '收到商品时有破损'},
+        {value: 32, text: '拼接、走线不齐', jude: true},
+        {value: 33, text: '开线、走丝', jude: true},
+        {value: 44, text: '有污渍'},
+        {value: 45, text: '配件破损或不符'}
+      ]
+    },
+
+    subs: {
+      defaultValue: null,
+      values: [
+        {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc"},
+        {value: 12, text: '拼接、走线不齐'},
+        {value: 21, text: '材质不符', jude: true},
+        {value: 22, text: '严重缩水、褪色、起球、掉毛'},
+      ]
+    },
+
+    logistics: {
+      defaultValue: null,
+      values: [
+        {value: 1, text: 'EMS'},
+        {value: 2, text: '申通E物流'},
+        {value: 3, text: '圆通速递'},
+        {value: 4, text: '宅急送'}
+      ]
+    },
+
+    jude: {
+      defaultValue: null,
+      values: [
+        {value: 1, text: '31名大众评审'},
+        {value: 2, text: '淘宝小二评审'}
+      ]
+    },
+
+    phone: 1111111111,
+
+    feedback: {
+      value: null,
+      values: [
+        {value: 1, text: '卖家已签收未处理'},
+        {value: 2, text: '卖家拒绝签收'},
+        {value: 3, text: '卖家反馈未收到货'},
+        {value: 4, text: '退货地址不详细'}
+      ]
+    },
+
+    editable: function(){
+      var edit = !this.get('isEdit');
+      this.set('isEdit', edit);
+    },
+
+    refundMoney: {
+
+      label: "需要退款金额",
+      required: 1,
+      value: "",
+      max: "155",
+      min: "0",
+      postage: "10",
+      isWrite: true
+
+    }
+  }, {
+
+    realMax:  function(){
+
+      var isSevenDayReason = Number(this.get('problem.defaultValue')) == 3;
+      var max = this.get('refundMoney.max');
+
+      if(!isSevenDayReason){
+        return max;
+      } else {
+        var postage = this.get('refundMoney.postage');
+        return max - postage;
+      }
+    },
+
+    submit: function(){
+      alert('submit it');
+    }
+
+  });
+
+})
+</script>
+
+<div class="container">
+  <div class="bidi-viewer panel panel-primary" data-view="list">
+
+    <script type="text/xtemplate">
+    <div class="panel-heading">示例3，list</div>
+    <h2>Your seat reservations (<span {{watch "text: seats.length"}}></span>)</h2>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Passenger name</th><th>Meal</th><th>Surcharge</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#watch "list: seats"}}
+        <tr>
+          <td><input value="{{name}}" /></td>
+          <td><select {{watch "select: meal"}}>
+              {{#each ../meals}}
+                {{#if ../meal === xindex}}
+                <option value="{{value}}" selected="selected">{{mealName}}</option>
+                {{else}}
+                <option value="{{value}}">{{mealName}}</option>
+                {{/if}}
+              {{/each}}
+          </select></td>
+          <td {{watch "text: price: formattedPrice"}}></td>
+          <td><a class="btn btn-danger" href="#nowhere" {{watch "click: remove"}}>Remove</a></td>
+        </tr>
+        {{/watch}}
+      </tbody>
+    </table>
+
+    <button class="btn btn-primary" {{watch "click: addSeat" "attr: seats.length > 5: disabled"}}>Reserve another seat</button>
+
+    <h3 {{watch "class: totalSurcharge <= 0: hide"}}>
+      Total surcharge: <span {{watch "text: totalSurcharge: formattedPrice"}}></span>
+    </h3>
+    </script>
+
+  </div>
+
+  <script type="text/javascript">
+    S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+
+      function formattedPrice(price){
+        return price ? "$" + price.toFixed(2) : "None";        
+      }   
+
+      Bidi.pipe('formattedPrice', formattedPrice);
+
+      function Seat(name, meal){
+        this.name = name;
+        this.meal = meal;
+      }
+
+      Seat.prototype.price = function(seat){
+        var meal = this.get('meal', seat);
+        var m = this.get('meals')[meal];
+        return m.price;
+      };
+
+      Seat.prototype.remove = function(seat){
+        this.remove(seat);
+      };
+
+      Bidi.xbind('list', {
+        seats: [
+          new Seat('Steve', 0),
+          new Seat('Hanwen', 1)
+        ],
+        meals: [
+          { mealName: "Standard (sandwich)", price: 0, value: 0 },
+          { mealName: "Premium (lobster)", price: 34.95, value: 1 },
+          { mealName: "Ultimate (whole zebra)", price: 290, value: 2 }
+        ]
+      }, {
+        totalSurcharge: function(){
+
+          var seats = this.get('seats');
+          var price = 0;
+
+          S.each(seats, function(seat){
+            price += this.get('price', seat);
+          }, this);
+
+          return price;
+        },
+        addSeat: function(){
+          var seat = new Seat('Haha', 2);
+          this.add(seat, 'seats');
+        }
+      });
+
+      //Bidi.init();
+
+    })
+  </script>
+
+</div>
+
+<div class="container">
+
+  <div class="bidi-viewer panel panel-primary" data-view="webmail">
+
+    <script type="text/xtemplate">
+    <div class="panel-heading">示例4：web app</div>
+    <!-- Folders -->
+    <ul class="nav nav-tabs">
+      {{#watch "list: folders"}}
+      <li {{watch "class: isSeleted: active" "click: goFold"}}>
+        <a href="#nowhere">{{text}}</a>
+      </li>
+      {{/watch}}
+    </ul>
+
+    <!-- Mails grid -->
+    <table class="mails table table-bordered table-hover" {{watch "class: !mails.length: hide"}}>
+      <thead><tr><th>From</th><th>To</th><th>Subject</th><th>Date</th></tr></thead>
+      <tbody>
+        {{#watch "list: mails"}}
+        <tr {{watch "click: $root.goToMail"}}>
+          <td>{{from}}</td>
+          <td>{{to}}</td>
+          <td>{{subject}}</td>
+          <td>{{date}}</td>
+        </tr>
+      {{/watch}}
+      </tbody>
+    </table>
+
+    <!-- Chosen mail -->
+    <div class="viewMail" {{watch "class: !choosedMail: hide"}}>
+      <div class="mail">
+        {{#watch "render: choosedMail"}}
+        <div class="mailInfo">
+          <h1>{{subject}}</h1>
+          <p><label>From</label>: <span>{{form}}</span></p>
+          <p><label>To</label>: <span>{{to}}</span>/</p>
+          <p><label>Date</label>: <span>{{date}}</span></p>
+        </div>
+        <p class="message">{{{messageContent}}}</p>
+        {{/watch}}
+      </div>
+    </div>
+    </script>
+
+  </div>
+
+  <script type="text/javascript">
+    S.use('gallery/bidi/1.0/index, ajax, json', function (S, Bidi) {
+
+      function Folder(text){
+        this.text = text;
+      }
+
+      S.augment(Folder, {
+
+        goFold: function(folder){
+          var text = this.get('text' ,folder);
+          this.set('folder', text);
+          showMails(text);
+        },
+
+        isSeleted: function(folder){
+          var text = this.get('text' ,folder);
+          return text == this.get('folder');
+        }
+
+      });
+
+      var view = Bidi.xbind('webmail', {
+        folders: [
+          new Folder('Index'),
+          new Folder('Archive'),
+          new Folder('Sent'),
+          new Folder('Spam')
+        ],
+        mails: [],
+        choosedMail: false,
+        folder: "Index"
+      }, {
+        goToMail: function(mail){
+          var mail = this.get(null, mail)
+          S.io.get('./webmail/mail.html?id=' + mail.id).then(function(argv){
+            var mail = eval('(' + argv[0] + ')')
+            model.set('choosedMail', mail)
+            model.set('mails', [])
+          });
+        }
+      }); 
+
+      var model = view.model;
+
+      Bidi.init();
+
+      showMails('Index');
+
+      function showMails(folder){
+        S.io.get('./webmail/' + folder + '.htm').then(function(argv){
+          var mails = eval(argv[0]);
+          model.set('mails', mails);
+          model.set('choosedMail', false)
+        });
+      }
+
+    })
+  </script>
+</div>
 
 </body>
 </html>

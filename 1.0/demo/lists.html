@@ -4,51 +4,53 @@
   <meta charset="utf-8"/>
   <title>demo lists</title>
   <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css">
   <style type="text/css">
   .hide { display: none; }
+  .container { max-width: 700px; }
   </style>
 </head>
 <body>
 
-<h2>demo标题</h2>
+<div class="container">
+  <div class="bidi-viewer panel panel-primary" data-view="list">
 
-<div class="bidi-viewer" data-view="list">
+    <script type="text/xtemplate">
+    <h2>Your seat reservations (<span {{watch "text: seats.length"}}></span>)</h2>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Passenger name</th><th>Meal</th><th>Surcharge</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#watch "list: seats"}}
+        <tr>
+          <td><input value="{{name}}" /></td>
+          <td><select {{watch "select: meal"}}>
+              {{#each ../meals}}
+                {{#if ../meal === xindex}}
+                <option value="{{value}}" selected="selected">{{mealName}}</option>
+                {{else}}
+                <option value="{{value}}">{{mealName}}</option>
+                {{/if}}
+              {{/each}}
+          </select></td>
+          <td {{watch "text: price: formattedPrice"}}></td>
+          <td><a class="btn btn-danger" href="#nowhere" {{watch "click: remove"}}>Remove</a></td>
+        </tr>
+        {{/watch}}
+      </tbody>
+    </table>
 
-  <script type="text/xtemplate">
-  <h2>Your seat reservations (<span {{watch "text: seats.length"}}></span>)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Passenger name</th><th>Meal</th><th>Surcharge</th><th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#watch "list: seats"}}
-      <tr>
-        <td><input value="{{name}}" /></td>
-        <td><select {{watch "select: meal"}}>
-            {{#each ../meals}}
-              {{#if ../meal === xindex}}
-              <option value="{{value}}" selected="selected">{{mealName}}</option>
-              {{else}}
-              <option value="{{value}}">{{mealName}}</option>
-              {{/if}}
-            {{/each}}
-        </select></td>
-        <td {{watch "text: price: formattedPrice"}}></td>
-        <td><a href="#nowhere" {{watch "click: remove"}}>Remove</a></td>
-      </tr>
-      {{/watch}}
-    </tbody>
-  </table>
+    <button class="btn btn-primary" {{watch "click: addSeat" "attr: seats.length > 5: disabled"}}>Reserve another seat</button>
 
-  <button {{watch "click: addSeat" "attr: seats.length > 5: disabled"}}>Reserve another seat</button>
+    <h3 {{watch "class: totalSurcharge <= 0: hide"}}>
+      Total surcharge: <span {{watch "text: totalSurcharge: formattedPrice"}}></span>
+    </h3>
+    </script>
 
-  <h3 {{watch "class: totalSurcharge <= 0: hide"}}>
-    Total surcharge: <span {{watch "text: totalSurcharge: formattedPrice"}}></span>
-  </h3>
-  </script>
-
+  </div>
 </div>
 
 <script>
@@ -100,7 +102,8 @@
           { mealName: "Standard (sandwich)", price: 0, value: 0 },
           { mealName: "Premium (lobster)", price: 34.95, value: 1 },
           { mealName: "Ultimate (whole zebra)", price: 290, value: 2 }
-        ],
+        ]
+      }, {
         totalSurcharge: function(){
 
           var seats = this.get('seats');

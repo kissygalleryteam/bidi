@@ -4,230 +4,256 @@
   <meta charset="utf-8"/>
   <title>demo标题</title>
   <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.css">
   <style type="text/css">
   .hide { display: none; }
   </style>
 </head>
 <body>
+<div class="container">
+  <div class="bidi-viewer panel panel-primary" data-view="form">
+    <script type="text/xtemplte">
 
-<h2>demo标题</h2>
+<div class="panel-heading">表单示例</div>
+  <form class="form-horizontal" action="#">
 
-<div class="bidi-viewer" data-view="form">
-  <script type="text/xtemplte">
+    <div class="form-group">
+      <label class="col-lg-2 control-label">退款原因: </label>
+      <div class="col-lg-10">
+        <p class="form-control-static">
+          <span {{class "isEdit: hide"}}>
+            <em {{text "problem.$item.text"}}></em>
+          </span>
+          <select name="key1" {{watch "select: problem.defaultValue" "class: !isEdit: hide"}}>
+            {{#each problem.values}}
+            <option value="{{value}}">{{text}}</option>
+            {{/each}}
+          </select>
+          <a href="#nowhere" {{click "editable"}}>修改</a>
+        </p>
+      </div>
+    </div>
 
-  <p class="item">
-    <label>退款原因: </label>
-    <span {{class "isEdit: hide"}}>
-      <em {{text "problem.$item.text"}}></em>
-    </span>
-    <select name="key1" {{watch "select: problem.defaultValue" "class: !isEdit: hide"}}>
-      {{#each problem.values}}
-      <option value="{{value}}">{{text}}</option>
+    <div class="form-group" {{watch "class: !reasons.values: hide"}}>
+      <label class="col-lg-2 control-label">问题描述:</label>
+      <div class="col-lg-10">
+        {{#watch "linkage: reasons.values: problem" "radio: reasons.defaultValue"}}
+        <label class="radio-inline">
+          <input type="radio" name="name1" value="{{value}}"/>
+          {{text}}
+        </label>
+        {{/watch}}
+      </div>
+    </div>
+
+    <div class="form-group hide" {{watch "class: !subs.values: hide"}}>
+      <label class="col-lg-2 control-label">问题描述第三级:</label>
+      <div class="col-lg-10">
+      {{#watch "linkage: subs.values: reasons"}}
+      <label class="radio-inline">
+        <input type="radio" name="name2" value="{{value}}"/>
+        {{text}}
+      </label>
+      {{/watch}}
+      </div>
+    </div>
+
+    <p class="form-group">
+      <label class="col-lg-2 control-label">货物当前状态:</label>
+      <span class="col-lg-10">
+        <label class="radio-inline"><input type="radio" name="status" value="1" />未寄回商品</label>
+        <label class="radio-inline"><input type="radio" name="status" value="2" {{watch "value: itemSendBack"}}/>已寄回商品</label>
+        <span class="label label-warning hide" {{watch "class: !itemSendBack: hide"}}>亲，没得到卖家同意，请不要退货，以免给您带来损失</span>
+      </span>
+    </p>
+
+    <div class="form-group hide" {{watch "class: !itemSendBack: hide"}}>
+      <label class="col-lg-2 control-label">退货信息:</label>
+
+      <div class="col-lg-10">
+        <p class="form-control-static">
+        <select name="safd" {{watch "attr: !itemSendBack: disabled"}}>
+        {{#each logistics.values}}
+          <option value="{{value}}">{{text}}</option>
+        {{/each}}
+        </select>
+        退款额度<span class="label label-info" {{text "realMax"}}></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group hide" {{watch "class: !itemSendBack: hide"}}>
+      <label class="col-lg-2 control-label">退货反馈:</label>
+      <p class="col-lg-10">
+      {{#each feedback.values}}
+      <label class="radio-inline">
+        <input type="radio" name="name" value="{{value}}" {{watch "attr: !itemSendBack: disabled"}}/>
+        {{text}}
+      </label>
       {{/each}}
-    </select>
-      <a href="#nowhere" {{click "editable"}}>修改</a>
-  </p>
+      </p>
+    </div>
 
-  <p class="item" {{watch "class: !reasons.values: hide"}}>
-    <label>问题描述：</label>
-    {{#watch "linkage: reasons.values: problem" "radio: reasons.defaultValue"}}
-    <label>
-      <input type="radio" name="name1" value="{{value}}"/>
-      {{text}}
-    </label>
-    {{/watch}}
-  </p>
 
-  <p class="item hide" {{watch "class: !subs.values: hide"}}>
-    <label>问题描述第三级：</label>
-    {{#watch "linkage: subs.values: reasons"}}
-    <label>
-      <input type="radio" name="name2" value="{{value}}"/>
-      {{text}}
-    </label>
-    {{/watch}}
-  </p>
+    <div class="form-group hide" {{watch "class: !reasons.$item.jude || itemSendBack: hide"}}>
+      <label class="col-lg-2 control-label">要求谁来评判: </label>
+      
+      <p class="col-lg-10">
+      {{#each jude.values}}
+      <label class="radio-inline">
+        <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.$item.jude: disabled"}}/>
+        {{text}}
+      </label>
+      {{/each}}
+      </p>
+    </div>
 
-  <p class="item">
-    <label>货物当前状态</label>
-    <span class="radio-box">
-      <label><input type="radio" name="status" value="1" />未寄回商品</label>
-      <label><input type="radio" name="status" value="2" {{watch "value: itemSendBack"}}/>已寄回商品</label>
-    </span>
-    <span class="tips hide" {{watch "class: !itemSendBack: hide"}}>亲，没得到卖家同意，请不要退货，以免给您带来损失</span>
-  </p>
+    <div class="form-group">
+      <label class="col-lg-2 control-label">联系手机:</label>
+      <p class="col-lg-10 form-control-static">
+        <input type="text" {{watch "value: phone"}}/>
+      </p>
+    </div>
 
-  <p class="item hide" {{watch "class: !itemSendBack: hide"}}>
-    <label>退货信息</label>
-    <select name="safd" {{watch "attr: !itemSendBack: disabled"}}>
-    {{#each logistics.values}}
-      <option value="{{value}}">{{text}}</option>
-    {{/each}}
-    </select>
-  </p>
+    <div class="form-group">
+      <p class="col-lg-offset-2 col-lg-10"">
+      <input type="button" value="提交" class="btn btn-default" {{click "submit"}}/>
+      </p>
+    </div>
 
-  <p class="item hide" {{watch "class: !itemSendBack: hide"}}>
-    <label>退货反馈：</label>
-    {{#each feedback.values}}
-    <label>
-      <input type="radio" name="name" value="{{value}}" {{watch "attr: !itemSendBack: disabled"}}/>
-      {{text}}
-    </label>
-    {{/each}}
-  </p>
+    </form>
+    </script>
+  </div>
 
-  <p {{text "realMax"}}></p>
-
-  <p class="item hide" {{watch "class: !reasons.$item.jude || itemSendBack: hide"}}>
-    <label>要求谁来评判: </label>
-    {{#each jude.values}}
-    <label>
-      <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.$item.jude: disabled"}}/>
-      {{text}}
-    </label>
-    {{/each}}
-  </p>
-
-  <p class="item">
-    <label>联系手机：
-    <input type="text" {{watch "value: phone"}}/>
-    </label>
-  </p>
-
-  <p class="item">
-  <input type="button" value="提交" {{click "submit"}}/>
-  </p>
-  </script>
 </div>
-
 <script>
-    var S = KISSY;
-    if (S.Config.debug) {
-      var srcPath = "../../../";
-      S.config({
-        packages:[
-          {
-            name: "gallery",
-            path: srcPath,
-            charset: "utf-8",
-            ignorePackageNameInUri: true
-          }
-        ]
-      });
+var S = KISSY;
+if (S.Config.debug) {
+  var srcPath = "../../../";
+  S.config({
+    packages:[
+      {
+      name: "gallery",
+      path: srcPath,
+      charset: "utf-8",
+      ignorePackageNameInUri: true
+    }
+    ]
+  });
+}
+
+S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+
+  Bidi.active(['text', 'click', 'class']);
+
+  var form = Bidi.xbind('form', {
+
+    problem: {
+      defaultValue: 2,
+      values: [
+        {value: 1, text: '大小尺寸不符合', reasons: [11, 12]},
+        {value: 2, text: '材料面料不符合', reasons: [21, 22]},
+        {value: 3, text: '工艺手艺问题', reasons: [31, 32, 33]},
+        {value: 4, text: '颜色、款式、图案描述不符', reasons: [44, 45]},
+        {value: 5, text: '颜色、款式、图案描述不符'}
+      ],
+    },
+
+    reasons: {
+      defaultValue: null,
+      values: [
+        {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc", subs: [11, 12]},
+        {value: 12, text: '拼接、走线不齐'},
+        {value: 21, text: '材质不符', jude: true, subs: [21, 22, 12]},
+        {value: 22, text: '严重缩水、褪色、起球、掉毛'},
+        {value: 31, text: '收到商品时有破损'},
+        {value: 32, text: '拼接、走线不齐', jude: true},
+        {value: 33, text: '开线、走丝', jude: true},
+        {value: 44, text: '有污渍'},
+        {value: 45, text: '配件破损或不符'}
+      ]
+    },
+
+    subs: {
+      defaultValue: null,
+      values: [
+        {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc"},
+        {value: 12, text: '拼接、走线不齐'},
+        {value: 21, text: '材质不符', jude: true},
+        {value: 22, text: '严重缩水、褪色、起球、掉毛'},
+      ]
+    },
+
+    logistics: {
+      defaultValue: null,
+      values: [
+        {value: 1, text: 'EMS'},
+        {value: 2, text: '申通E物流'},
+        {value: 3, text: '圆通速递'},
+        {value: 4, text: '宅急送'}
+      ]
+    },
+
+    jude: {
+      defaultValue: null,
+      values: [
+        {value: 1, text: '31名大众评审'},
+        {value: 2, text: '淘宝小二评审'}
+      ]
+    },
+
+    phone: 1111111111,
+
+    feedback: {
+      value: null,
+      values: [
+        {value: 1, text: '卖家已签收未处理'},
+        {value: 2, text: '卖家拒绝签收'},
+        {value: 3, text: '卖家反馈未收到货'},
+        {value: 4, text: '退货地址不详细'}
+      ]
+    },
+
+    editable: function(){
+      var edit = !this.get('isEdit');
+      this.set('isEdit', edit);
+    },
+
+    refundMoney: {
+
+      label: "需要退款金额",
+      required: 1,
+      value: "",
+      max: "155",
+      min: "0",
+      postage: "10",
+      isWrite: true
+
+    }
+  }, {
+
+    realMax:  function(){
+
+      var isSevenDayReason = Number(this.get('problem.defaultValue')) == 3;
+      var max = this.get('refundMoney.max');
+
+      if(!isSevenDayReason){
+        return max;
+      } else {
+        var postage = this.get('refundMoney.postage');
+        return max - postage;
+      }
+    },
+
+    submit: function(){
+      alert('submit it');
     }
 
-    S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+  });
 
-      Bidi.active(['text', 'click', 'class']);
+  Bidi.init();
 
-      var form = Bidi.xbind('form', {
-
-        problem: {
-          defaultValue: 2,
-          values: [
-            {value: 1, text: '大小尺寸不符合', reasons: [11, 12]},
-            {value: 2, text: '材料面料不符合', reasons: [21, 22]},
-            {value: 3, text: '工艺手艺问题', reasons: [31, 32, 33]},
-            {value: 4, text: '颜色、款式、图案描述不符', reasons: [44, 45]},
-            {value: 5, text: '颜色、款式、图案描述不符'}
-          ],
-        },
-
-        reasons: {
-          defaultValue: null,
-          values: [
-            {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc", subs: [11, 12]},
-            {value: 12, text: '拼接、走线不齐'},
-            {value: 21, text: '材质不符', jude: true, subs: [21, 22, 12]},
-            {value: 22, text: '严重缩水、褪色、起球、掉毛'},
-            {value: 31, text: '收到商品时有破损'},
-            {value: 32, text: '拼接、走线不齐', jude: true},
-            {value: 33, text: '开线、走丝', jude: true},
-            {value: 44, text: '有污渍'},
-            {value: 45, text: '配件破损或不符'}
-          ]
-        },
-
-        subs: {
-          defaultValue: null,
-          values: [
-            {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc"},
-            {value: 12, text: '拼接、走线不齐'},
-            {value: 21, text: '材质不符', jude: true},
-            {value: 22, text: '严重缩水、褪色、起球、掉毛'},
-          ]
-        },
-
-        logistics: {
-          defaultValue: null,
-          values: [
-            {value: 1, text: 'EMS'},
-            {value: 2, text: '申通E物流'},
-            {value: 3, text: '圆通速递'},
-            {value: 4, text: '宅急送'}
-          ]
-        },
-
-        jude: {
-          defaultValue: null,
-          values: [
-            {value: 1, text: '31名大众评审'},
-            {value: 2, text: '淘宝小二评审'}
-          ]
-        },
-
-        phone: 1111111111,
-
-        feedback: {
-          value: null,
-          values: [
-            {value: 1, text: '卖家已签收未处理'},
-            {value: 2, text: '卖家拒绝签收'},
-            {value: 3, text: '卖家反馈未收到货'},
-            {value: 4, text: '退货地址不详细'}
-          ]
-        },
-
-        editable: function(){
-          var edit = !this.get('isEdit');
-          this.set('isEdit', edit);
-        },
-
-        refundMoney: {
-
-          label: "需要退款金额",
-          required: 1,
-          value: "",
-          max: "155",
-          min: "0",
-          postage: "10",
-          isWrite: true
-
-        }
-      }, {
-
-        realMax:  function(){
-
-          var isSevenDayReason = Number(this.get('problem.defaultValue')) == 3;
-          var max = this.get('refundMoney.max');
-
-          if(!isSevenDayReason){
-            return max;
-          } else {
-            var postage = this.get('refundMoney.postage');
-            return max - postage;
-          }
-        },
-
-        submit: function(){
-          alert('submit it');
-        }
-
-      });
-
-      Bidi.init();
-
-    })
+})
 </script>
 
 </body>

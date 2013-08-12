@@ -354,12 +354,13 @@ KISSY.add(function(S, evaluation){
      * @private
      */
     _setByParent: function(key, value, parent){
+
       var o = this._getParent(parent);
       if (o && key in o) {
         o[key] = value;
       }
-      this.fire('change:' + parent.name + ':' + parent.id);
-      this.fire('change:' + parent.name);
+
+      this.fire('change:' + parent.name, { $item: parent.id });
     },
 
     /**

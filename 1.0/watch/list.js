@@ -48,6 +48,8 @@ KISSY.add(function(S, XTemplate){
 
         model.change(key, function(e){
 
+          if (e.$item) return;
+
           var fn = $control('fn');
           var option = {params: [e.val], fn: fn};
 

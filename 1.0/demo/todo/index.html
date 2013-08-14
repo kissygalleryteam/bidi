@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" data-framework="bidi">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>Template • TodoMVC</title>
+		<link rel="stylesheet" href="bower_components/todomvc-common/base.css">
+    <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+	</head>
+	<body>
+		<section id="todoapp" class="bidi-viewer" data-view="todoapp">
+      <script type="text/xtempalte">
+			<header id="header">
+				<h1>todos</h1>
+        <input id="new-todo" placeholder="What needs to be done?" autofocus {{action "keypress: addTodo"}}>
+			</header>
+			<!-- This section should be hidden by default and shown when there are todos -->
+			<section id="main">
+        <input class="toggle-all" type="checkbox" {{action "click: toggelAll"}}>
+				<label for="toggle-all">Mark all as complete</label>
+				<ul class="todo-list">
+          {{#watch 'list: todos'}}
+          <li {{class "isCompleted: completed"}}>
+						<div class="view">
+              <input class="toggle" type="checkbox" {{attr "isCompleted: checked"}}>
+              <label {{text "text"}}></label>
+              <button class="destroy" {{action "click: remove"}}></button>
+						</div>
+            <input class="edit" {{value "text"}}>
+					</li>
+          {{/watch}}
+				</ul>
+			</section>
+
+			<footer id="footer">
+				<!-- This should be `0 items left` by default -->
+        <span id="todo-count"><strong {{text "unfinished"}}></strong> item left</span>
+				<!-- Remove this if you don't implement routing -->
+				<ul id="filters">
+					<li>
+            <a class="selected" href="#/" {{action "click: show_all"}}>All</a>
+					</li>
+					<li>
+            <a href="#/active" {{action "click: show_active"}}>Active</a>
+					</li>
+					<li>
+            <a href="#/completed" {{action "click: show_completed"}}>Completed</a>
+					</li>
+				</ul>
+				<!-- Hidden if no completed items are left ↓ -->
+        <button class="clear-completed" {{watch "text: completed" "click: clear_completed"}}></button>
+			</footer>
+      </script>
+		</section>
+
+		<footer id="info">
+			<p>Double-click to edit a todo</p>
+			<!-- Remove the below line ↓ -->
+			<p>Template by <a href="http://github.com/shepherdwind">Eward Song</a></p>
+			<!-- Change this out with your name and url ↓ -->
+			<p>Created by <a href="http://shepehrdwind.com">shepherdwind</a></p>
+			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+		</footer>
+		<!-- Scripts here. Don't remove this ↓ -->
+		<script src="bower_components/todomvc-common/base.js"></script>
+		<script src="js/app.js"></script>
+	</body>
+</html>

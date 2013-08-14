@@ -16,6 +16,7 @@ gallery/bidi/1.0/watch/render
 gallery/bidi/1.0/watch/value
 gallery/bidi/1.0/watch/index
 gallery/bidi/1.0/views
+gallery/bidi/1.0/macros
 gallery/bidi/1.0/index
 
 */
@@ -1344,16 +1345,19 @@ KISSY.add('gallery/bidi/1.0/watch/attr',function(S){
       var $control = this.$control;
       var model = $control('model');
       var key = $control('key');
-      var attrname = $control('argv')[0];
-
       var expr = model.evaluation($control);
 
+      attr(expr.val);
+
       model.change(expr.related, function(){
-
-        var el = $control('el');
-        el.attr(attrname, model.evaluation($control).val);
-
+        attr(model.evaluation($control).val);
       });
+
+      function attr(val){
+        var el = $control('el');
+        var attrname = $control('argv')[0];
+        el.attr(attrname, val);
+      }
 
     });
 
@@ -1864,11 +1868,63 @@ KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch){
 });
 
 /**
+ * macros支持
+ * {{#macro "error" "error"}}
+ * {{#if error}}
+ *    <span>error.text</span>
+ * {{/if}
+ * {{/macro}}
+ *
+ * {{{macro "error" error}}}
+ */
+KISSY.add('gallery/bidi/1.0/macros',function(){
+
+  var macros = {};
+
+  function macro(scopes, option){
+
+    var params = option.params;
+    var macroName = params[0];
+
+    //声明宏
+    if (option.fn) {
+
+      var formal = params.slice(1);
+
+      macros[macroName] = {
+        fn: option.fn,
+        params: params.slice(1)
+      }
+
+      return '';
+    //调用
+    } else {
+
+      var scope = {};
+      var macro = macros[macroName];
+      var formal = macro.params;
+
+      for (var i = 1; i < params.length; i++) {
+        scope[formal[i - 1]] = params[i];
+      }
+
+      scopes.unshift(scope);
+      return macro.fn(scopes);
+
+    }
+
+  }
+
+  return macro;
+
+});
+
+/**
  * @fileoverview 请修改组件描述
  * @author hanwen.sah<hanwen.sah@taobao.com>
  * @module bidi
  **/
-KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, View, Watcher){
+KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, View, Watcher, macro){
 
   "use strict";
 
@@ -2030,7 +2086,7 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
   };
 
   // 缓存已经注册到XTemplate中的命令，避免重复执行
-  var commands = {};
+  var commands = { macro: macro };
   // for Bidi.active function
   function addCommand(name){
 
@@ -2083,6 +2139,7 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
 
         //添加命令
         view.template.addCommand('watch', watch);
+        view.template.addCommand('macro', macro);
         S.each(commands, function(fn, cmd){
           view.template.addCommand(cmd, fn);
         });
@@ -2113,7 +2170,8 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
     'xtemplate',
     './models',
     './views',
-    './watch/index'
+    './watch/index',
+    './macros'
   ]
 });
 

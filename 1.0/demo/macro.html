@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>demo标题</title>
+  <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.css">
+  <style type="text/css">
+  .hide { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="bidi-viewer panel panel-primary" data-view="user">
+    <script type="text/xtemplate">
+      <div class="panel-heading">示例5, 宏扩展</div>
+
+      {{#macro "error" "err"}}
+        {{#if err}}
+           <span>{{err.text}}</span>
+        {{/if}}
+      {{/macro}}
+      
+      {{#reason}}
+        {{{macro "error" error}}}
+      {{/reason}}
+
+    </script>
+  </div>
+</div>
+
+<script>
+    var S = KISSY;
+    if (S.Config.debug) {
+      var srcPath = "../../../";
+      S.config({
+        packages:[
+          {
+            name: "gallery",
+            path: srcPath,
+            charset: "utf-8",
+            ignorePackageNameInUri: true
+          }
+        ]
+      });
+    }
+
+    S.use('gallery/bidi/1.0/index', function (S, Bidi) {
+
+      Bidi.xbind('user', {
+        reason: {
+          error: {text: "hello, this error on reason!"}
+        }
+      });
+      Bidi.init();
+
+    })
+</script>
+
+</body>
+</html>

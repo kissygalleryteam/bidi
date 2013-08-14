@@ -3,7 +3,7 @@
  * @author hanwen.sah<hanwen.sah@taobao.com>
  * @module bidi
  **/
-KISSY.add(function (S, Node, Base, XTemplate, Model, View, Watcher){
+KISSY.add(function (S, Node, Base, XTemplate, Model, View, Watcher, macro){
 
   "use strict";
 
@@ -165,7 +165,7 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, View, Watcher){
   };
 
   // 缓存已经注册到XTemplate中的命令，避免重复执行
-  var commands = {};
+  var commands = { macro: macro };
   // for Bidi.active function
   function addCommand(name){
 
@@ -218,6 +218,7 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, View, Watcher){
 
         //添加命令
         view.template.addCommand('watch', watch);
+        view.template.addCommand('macro', macro);
         S.each(commands, function(fn, cmd){
           view.template.addCommand(cmd, fn);
         });
@@ -248,6 +249,7 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, View, Watcher){
     'xtemplate',
     './models',
     './views',
-    './watch/index'
+    './watch/index',
+    './macros'
   ]
 });

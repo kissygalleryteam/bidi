@@ -15,6 +15,11 @@ KISSY.add(function(S){
       var expr = model.evaluation($control);
       el.val(expr.val);
 
+      model.change(expr.related, function(e){
+        var val = model.get(key, parent);
+        el.val(val);
+      });
+
       el.on('change', function(){
         model.set(key, el.val(), parent);
       });

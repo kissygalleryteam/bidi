@@ -1,11 +1,18 @@
 {
-"name": "bidi",
-"version": "1.0.0",
-"devDependencies": {
+  "name": "bidi",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "mocha-phantomjs 1.0/spec/index.html -t 40000 -R dot"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/shepherdwind/bidi.git"
+  },
+  "devDependencies": {
     "grunt-contrib-uglify": "~0.2.0",
     "grunt": "~0.4.1",
     "grunt-kmc": "~0.1.1",
-    "grunt-contrib-cssmin": "~0.6.0"
+    "grunt-contrib-cssmin": "~0.6.0",
+    "mocha": "~1.12.0"
+  }
 }
-}
-

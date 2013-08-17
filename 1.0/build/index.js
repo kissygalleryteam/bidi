@@ -956,7 +956,8 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
 
       if (S.isFunction(ret)){
         //如果在list中，函数第一个参数是，list所在的对象
-        ret = ret.call(this, parent);
+        val.parent = this;
+        ret = ret.call(val, parent);
       }
 
       if (this.__recode) {
@@ -972,7 +973,7 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
     _getParent: function(parent){
 
       // this.set('xxx', 'seat');
-      if (!parent.name || !parent.id) return parent;
+      if (parent.__parent__) return parent;
 
       var name = parent.name;
       var o = this.get(name);
@@ -1119,6 +1120,9 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
 
       if (this.__forbidden_set) return;
 
+      if (obj.__parent__)
+        obj = obj.__parent__;
+
       var parentKey = obj.name;
       var lists = this.get(parentKey);
       var index;
@@ -1166,7 +1170,9 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
         o[key] = value;
       }
 
-      this.fire('change:' + parent.name, { $item: parent.id });
+      var _p = parent.__parent__ || parent;
+      this.fire('change:' + _p.name, { $item: _p.id });
+      this.fire('change:' + _p.name + ':' + _p.id);
     },
 
     /**
@@ -1322,6 +1328,11 @@ KISSY.add('gallery/bidi/1.0/watch/select',function(S){
 
       var expr = model.evaluation($control);
       el.val(expr.val);
+
+      model.change(expr.related, function(e){
+        var val = model.get(key, parent);
+        el.val(val);
+      });
 
       el.on('change', function(){
         model.set(key, el.val(), parent);

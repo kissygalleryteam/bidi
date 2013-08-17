@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mocha</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="mocha.css" />
+    <link rel="stylesheet" href="../demo/bootstrap.css" />
+    <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  </head>
+
+  <body>
+
+    <div id="mocha"></div>
+
+    <div class="container">
+      <div class="bidi-viewer panel panel-primary" data-view="user">
+        <script type="text/xtemplate">
+          <div class="panel-heading">示例1,简单情况</div>
+          <p>hello, I am <strong {{text "fullName"}}></strong></p>
+          <p>hello, I am <strong {{text "firstName"}}></strong></p>
+          First Name: <input {{value "firstName"}}/><br>
+          Last Name: <input {{value "lastName"}}/>
+          <button {{click "capitalizeLastName"}}>Go caps</button>
+        </script>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="bidi-viewer panel panel-primary" data-view="form">
+        <script type="text/xtemplte">
+
+    <div class="panel-heading">表单示例</div>
+      <form class="form-horizontal" action="#">
+
+        <div class="form-group problem">
+          <label class="col-lg-2 control-label">退款原因: </label>
+          <div class="col-lg-10">
+            <p class="form-control-static">
+              <span {{class "isEdit: hide"}}>
+                <em {{text "problem.$item.text"}}></em>
+              </span>
+              <select name="key1" {{watch "select: problem.defaultValue" "class: !isEdit: hide"}}>
+                {{#each problem.values}}
+                <option value="{{value}}">{{text}}</option>
+                {{/each}}
+              </select>
+              <a href="#nowhere" {{click "editable"}}>修改</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="form-group reasons" {{watch "class: !reasons.values: hide"}}>
+          <label class="col-lg-2 control-label">问题描述:</label>
+          <div class="col-lg-10">
+            {{#watch "linkage: reasons.values: problem" "radio: reasons.defaultValue"}}
+            <label class="radio-inline">
+              <input type="radio" name="name1" value="{{value}}"/>
+              {{text}}
+            </label>
+            {{/watch}}
+          </div>
+        </div>
+
+        <div class="form-group hide" {{watch "class: !subs.values: hide"}}>
+          <label class="col-lg-2 control-label">问题描述第三级:</label>
+          <div class="col-lg-10">
+          {{#watch "linkage: subs.values: reasons"}}
+          <label class="radio-inline">
+            <input type="radio" name="name2" value="{{value}}"/>
+            {{text}}
+          </label>
+          {{/watch}}
+          </div>
+        </div>
+
+        <p class="form-group">
+          <label class="col-lg-2 control-label">货物当前状态:</label>
+          <span class="col-lg-10">
+            <label class="radio-inline"><input type="radio" name="status" value="1" />未寄回商品</label>
+            <label class="radio-inline"><input class="isSendBack" type="radio" name="status" value="2" {{watch "value: itemSendBack"}}/>已寄回商品</label>
+            <span class="label label-warning hide" {{watch "class: !itemSendBack: hide"}}>亲，没得到卖家同意，请不要退货，以免给您带来损失</span>
+          </span>
+        </p>
+
+        <div class="form-group hide logistics" {{watch "class: !itemSendBack: hide"}}>
+          <label class="col-lg-2 control-label">退货信息:</label>
+
+          <div class="col-lg-10">
+            <p class="form-control-static">
+            <select name="safd" {{watch "attr: !itemSendBack: disabled"}}>
+            {{#each logistics.values}}
+              <option value="{{value}}">{{text}}</option>
+            {{/each}}
+            </select>
+            退款额度<span class="label label-info realmax" {{text "realMax"}}></span>
+            </p>
+          </div>
+        </div>
+
+        <div class="form-group hide feedback" {{watch "class: !itemSendBack: hide"}}>
+          <label class="col-lg-2 control-label">退货反馈:</label>
+          <p class="col-lg-10">
+          {{#each feedback.values}}
+          <label class="radio-inline">
+            <input type="radio" name="name" value="{{value}}" {{watch "attr: !itemSendBack: disabled"}}/>
+            {{text}}
+          </label>
+          {{/each}}
+          </p>
+        </div>
+
+
+        <div class="form-group hide jude" {{watch "class: !reasons.$item.jude || itemSendBack: hide"}}>
+          <label class="col-lg-2 control-label">要求谁来评判: </label>
+          
+          <p class="col-lg-10">
+          {{#each jude.values}}
+          <label class="radio-inline">
+            <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.$item.jude: disabled"}}/>
+            {{text}}
+          </label>
+          {{/each}}
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label class="col-lg-2 control-label">联系手机:</label>
+          <p class="col-lg-10 form-control-static">
+            <input type="text" {{watch "value: phone"}}/>
+          </p>
+        </div>
+
+        <div class="form-group">
+          <p class="col-lg-offset-2 col-lg-10"">
+          <input type="button" value="提交" class="btn btn-default" {{click "submit"}}/>
+          </p>
+        </div>
+
+        </form>
+        </script>
+      </div>
+
+    </div>
+
+    <div class="container">
+      <div class="bidi-viewer panel panel-primary" data-view="list">
+
+        <script type="text/xtemplate">
+        <div class="panel-heading">示例3，list</div>
+        <h2>Your seat reservations (<span {{watch "text: seats.length"}}></span>)</h2>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Passenger name</th><th>Meal</th><th>Surcharge</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#watch "list: seats"}}
+            <tr>
+              <td><input value="{{name}}" /></td>
+              <td><select {{watch "select: meal"}}>
+                  {{#each ../meals}}
+                    {{#if ../meal === xindex}}
+                    <option value="{{value}}" selected="selected">{{mealName}}</option>
+                    {{else}}
+                    <option value="{{value}}">{{mealName}}</option>
+                    {{/if}}
+                  {{/each}}
+              </select></td>
+              <td class="price" {{watch "text: price: formattedPrice"}}></td>
+              <td><a class="btn btn-danger" href="#nowhere" {{watch "click: remove"}}>Remove</a></td>
+            </tr>
+            {{/watch}}
+          </tbody>
+        </table>
+
+        <button class="btn btn-primary" {{watch "click: addSeat" "attr: seats.length > 5: disabled"}}>Reserve another seat</button>
+
+        <h3 {{watch "class: totalSurcharge <= 0: hide"}}>
+          Total surcharge: <span {{watch "text: totalSurcharge: formattedPrice"}}></span>
+        </h3>
+        </script>
+
+      </div>
+    </div>
+
+    <script src="mocha.js"></script>
+    <script src="expect.js"></script>
+    <script>mocha.setup('bdd')</script>
+
+    <script type="text/javascript">
+      var S = KISSY;
+      if (S.Config.debug) {
+        var srcPath = "../../../";
+        S.config({
+          packages:[
+            {
+            name: "gallery",
+            path: srcPath,
+            charset: "utf-8",
+            ignorePackageNameInUri: true
+          }
+          ]
+        });
+      }
+      S.use('gallery/bidi/1.0/spec/bidi')
+    </script>
+  </body>
+</html>

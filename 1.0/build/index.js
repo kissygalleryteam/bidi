@@ -13,6 +13,7 @@ gallery/bidi/1.0/watch/each
 gallery/bidi/1.0/watch/radio
 gallery/bidi/1.0/watch/list
 gallery/bidi/1.0/watch/render
+gallery/bidi/1.0/watch/action
 gallery/bidi/1.0/watch/value
 gallery/bidi/1.0/watch/index
 gallery/bidi/1.0/views
@@ -881,6 +882,31 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
       return val;
     },
 
+    /**
+     * 和this.get一样，只是call用于处理函数，并且可以自定义其他参数和函数执行上下文
+     * @param {string} key 支持字符串和点操作，函数获取路径
+     * @param {array} args 其他参数
+     * @param {object|undefined} context 函数执行上下文
+     * @param {object} parent
+     * @return this
+     */
+    call: function(key, args, context, parent){
+
+      var fn = this._getAttr(key);
+      if (!S.isFunction(fn)) return this;
+
+      args = S.isArray(args) ? args : [args];
+      context = context || this;
+
+      if (parent) {
+        args.push(this.get(null, parent));
+      }
+
+      fn.apply(context, args);
+
+      return this;
+    },
+
     _getAttr: function(key, base){
 
       var paths = key.split('.');
@@ -947,17 +973,23 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
     _getByParent: function(key, parent){
 
       var ret;
+      var root = false;
       if (key && key.indexOf('$root.') === 0) {
         ret = this._getAttr(key.slice(6));
+        root = true;
       } else {
         var val = this._getParent(parent);
         ret = key !== null? this._getAttr(key, val): val;
       }
 
       if (S.isFunction(ret)){
-        //如果在list中，函数第一个参数是，list所在的对象
-        val.parent = this;
-        ret = ret.call(val, parent);
+        if (!root) {
+          //如果在list中，函数第一个参数是，list所在的对象
+          val.parent = this;
+          ret = ret.call(val, parent);
+        } else {
+          ret = ret.call(this, parent);
+        }
       }
 
       if (this.__recode) {
@@ -1166,9 +1198,7 @@ KISSY.add('gallery/bidi/1.0/models',function(S, evaluation){
     _setByParent: function(key, value, parent){
 
       var o = this._getParent(parent);
-      if (o && key in o) {
-        o[key] = value;
-      }
+      if (o) o[key] = value;
 
       var _p = parent.__parent__ || parent;
       this.fire('change:' + _p.name, { $item: _p.id });
@@ -1364,6 +1394,14 @@ KISSY.add('gallery/bidi/1.0/watch/attr',function(S){
         attr(model.evaluation($control).val);
       });
 
+      var el = $control('el');
+
+      el.on('change', function(){
+        var attrname = $control('argv')[0];
+        var val = el.attr(attrname);
+        model.set(key, val, $control('parent'))
+      });
+
       function attr(val){
         var el = $control('el');
         var attrname = $control('argv')[0];
@@ -1400,7 +1438,9 @@ KISSY.add('gallery/bidi/1.0/watch/each',function(S, XTemplate){
 
           var html = new XTemplate(fn);
           var option = {params: [model.get(key)], fn: fn};
-          html = html.runtime.option.commands.each([model.get(key)], option);
+          var scopesNew = $control('scopes').slice();
+          scopesNew.unshift(model.get(key));
+          html = html.runtime.option.commands.each(scopesNew, option);
           el.html(html);
 
           var paths = key.split('.');
@@ -1447,7 +1487,7 @@ KISSY.add('gallery/bidi/1.0/watch/radio',function(S){
       var key = $control('key');
       var el = $control('el');
 
-      el.delegate('click', 'input', function(e){
+      el.delegate('change', 'input', function(e){
 
         var target = S.all(e.currentTarget);
         var val = target.val();
@@ -1596,6 +1636,31 @@ KISSY.add('gallery/bidi/1.0/watch/render',function(S, XTemplate){
   requires: ['xtemplate']
 });
 
+KISSY.add('gallery/bidi/1.0/watch/action',function(S){
+
+  "use strict";
+
+  return function(watch){
+
+    watch.add('action', function(){
+
+      var $control = this.$control;
+      var model = $control('model');
+      var evt = $control('key');
+      var selector = $control('selector');
+      var argv = $control('argv');
+      var fn = argv[0];
+
+      $control('el').on(evt, function(e){
+        var parent = $control('parent');
+        model.call(fn, e, null, parent);
+      });
+    });
+
+  }
+
+} );
+
 KISSY.add('gallery/bidi/1.0/watch/value',function(S){
 
   "use strict";
@@ -1616,7 +1681,7 @@ KISSY.add('gallery/bidi/1.0/watch/value',function(S){
         var $control = this.$control;
         var key = $control('key');
         var model = $control('model');
-        var val = model.get(key);
+        var val = model.evaluation($control).val || '""';
 
         this.$html = ' value= ' + val + ' id=' + $control('id') + ' ';
       },
@@ -1667,16 +1732,20 @@ KISSY.add('gallery/bidi/1.0/watch/value',function(S){
         var el = this.el;
         var model = this.model;
         var key = this.key;
+        var $control = this.$control;
+        var expr = model.evaluation($control);
+        var parent = this.parent;
 
-        el.on('keyup', function(){
+        el.on('keyup change', function(){
 
           var val = el.val();
-          model.set(key, val);
+          model.set(key, val, parent);
 
         });
 
-        model.change(key, function(){
-          el.val(model.get(key));
+        model.change(expr.related, function(){
+          var val = model.evaluation($control).val || '';
+          el.val(val);
         });
 
       }
@@ -1771,6 +1840,7 @@ KISSY.add('gallery/bidi/1.0/watch/index',function(S){
     './radio',
     './list',
     './render',
+    './action',
     './value'
   ]
 });
@@ -1811,7 +1881,7 @@ KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch){
       return this;
     },
 
-    watch: function(params, fn){
+    watch: function(params, fn, scopes){
 
       var who = params[0];
       var key = params[1];
@@ -1839,6 +1909,8 @@ KISSY.add('gallery/bidi/1.0/views',function(S, Event, XTemplate, Watch){
           base: this.el,
           // XTemplate执行函数，只在block语法下需要，比如linkage、list
           fn: fn,
+          // XTemplate执行时上下文，再次渲染模板，需要保持上下文环境
+          scopes: scopes,
           // 其他参数，{{watch "text: key: argv0: argv1}}
           argv: argv,
           name: this.name,
@@ -1982,7 +2054,7 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
 
         if (!id) {
 
-          var o = Views[name].watch(params, option.fn);
+          var o = Views[name].watch(params, option.fn, scopes);
           id = o.id;
           var fn = params[0];
 
@@ -2104,7 +2176,9 @@ KISSY.add('gallery/bidi/1.0/index',function (S, Node, Base, XTemplate, Model, Vi
     if (name in commands) return;
 
     var fn = function(scopes, option){
-      option.params[0] = name + ':' + option.params[0];
+      S.each(option.params, function(param, i) {
+        option.params[i] = name + ':' + param;
+      });
       return watch(scopes, option);
     }
 

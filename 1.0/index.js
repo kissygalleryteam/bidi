@@ -172,7 +172,9 @@ KISSY.add(function (S, Node, Base, XTemplate, Model, View, Watcher, macro){
     if (name in commands) return;
 
     var fn = function(scopes, option){
-      option.params[0] = name + ':' + option.params[0];
+      S.each(option.params, function(param, i) {
+        option.params[i] = name + ':' + param;
+      });
       return watch(scopes, option);
     }
 

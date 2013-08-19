@@ -24,10 +24,15 @@
     Bidi.xbind('todoapp', {
       todos: [
         { text: 'hello' },
-        { text: 'hehe', isCompleted: true }
+        { text: 'do some cool' },
+        { text: 'trip', isCompleted: true },
+        { text: 'play ping pong' },
+        { text: 'finish bidi' },
+        { text: 'powerfull', isCompleted: true }
       ]
     }, {
 
+      //添加一个todo任务
       addTodo: function(e){
 
         if (e.keyCode !== 13) return;
@@ -39,9 +44,46 @@
         target.blur();
       },
 
+      show_active: function(e){
+
+        S.each(this.get('todos'), function(todo){
+          this.set('isHidden', !!todo.isCompleted, todo)
+        }, this)
+
+        $('.selected').removeClass('selected')
+        $(e.target).addClass('selected')
+        e.halt()
+
+      },
+
+      show_completed: function(e){
+
+        S.each(this.get('todos'), function(todo){
+          this.set('isHidden', !todo.isCompleted, todo)
+        }, this)
+
+        $('.selected').removeClass('selected')
+        $(e.target).addClass('selected')
+        e.halt()
+
+      },
+
+      show_all: function(e){
+
+        S.each(this.get('todos'), function(todo){
+          this.set('isHidden', false, todo)
+        }, this)
+
+        $('.selected').removeClass('selected')
+        $(e.target).addClass('selected')
+        e.halt()
+
+      },
+
       toggelAll: function(e){
         var target = e.target;
         S.each(this.get('todos'), function(todo){
+          if (todo.isHidden) return;
           this.set('isCompleted', target.checked, todo);
         }, this)
       },
@@ -51,14 +93,14 @@
       },
 
       unfinished: function(){
-        return S.filter(this.get('todos'), function(todos){
-          return !todos.isCompleted;
+        return S.filter(this.get('todos'), function(todo){
+          return !todo.isCompleted && !todo.isHidden;
         }).length;
       },
 
       completed: function(){
-        return S.filter(this.get('todos'), function(todos){
-          return todos.isCompleted;
+        return S.filter(this.get('todos'), function(todo){
+          return todo.isCompleted && !todo.isHidden;
         }).length;
       },
 

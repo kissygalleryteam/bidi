@@ -17,7 +17,7 @@ KISSY.add(function(){
       var el = simple.el.all('input');
       var el1 = el.item(0);
       var el2 = el.item(1);
-      expect(el.length).to.be(2);
+      expect(el.length).to.be(4);
       expect(el1.val() === simple.model.get('firstName')).to.be(true);
       expect(el2.val() === simple.model.get('lastName')).to.be(true);
     })
@@ -42,6 +42,20 @@ KISSY.add(function(){
       simple.el.all('button').fire('click');
       expect(input.val()).to.be('EWARD');
       expect(text.item(0).text()).to.be('Song EWARD');
+    })
+
+    it('support eqeq', function(){
+      var view = window.Bidi.simple
+
+      var eq = view.get('a == 1')
+      expect(view.model.get('a')).to.be('1')
+
+      expect(eq.attr('disabled')).to.be('disabled')
+
+      var eqeq = view.get('a === 1')
+      expect(view.model.get('a')).not.to.be(1)
+
+      expect(eqeq.attr('disabled')).to.be(undefined)
     })
   });
 })

@@ -1,5 +1,5 @@
 %left '||' '&&'
-%left '>=' '<=' '>' '==' '<' '!='
+%left '>=' '<=' '>' '===' '==' '<' '!='
 %left '!'
 
 %start expressions
@@ -26,6 +26,8 @@ math
   | math '>' math
       { $$ = { l: $1, r: $3, operator: $2 }; }
   | math '<' math
+      { $$ = { l: $1, r: $3, operator: $2 }; }
+  | math '===' math
       { $$ = { l: $1, r: $3, operator: $2 }; }
   | math '==' math
       { $$ = { l: $1, r: $3, operator: $2 }; }

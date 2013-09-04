@@ -13,6 +13,7 @@
 "."/[\$\w]  { return 'DOT' }
 "<="    { return yytext }
 ">="    { return yytext }
+"==="   { return yytext }
 "=="    { return yytext }
 ">"     { return yytext }
 "<"     { return yytext }

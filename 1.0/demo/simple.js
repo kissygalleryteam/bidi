@@ -1,6 +1,7 @@
 KISSY.add(function(S, Bidi){
   Bidi.active(['text', 'click', 'value']);
   var view = Bidi.xbind('user', {
+    a: "1",
     firstName: 'Song',
     lastName: 'Eward',
     fullName: function(){

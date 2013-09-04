@@ -132,6 +132,10 @@ KISSY.add(function(S, Parse){
           }
           break;
 
+        case '===':
+          return expr(ast.l, val) === expr(ast.r, val);
+          break;
+
         case '==':
           return expr(ast.l, val) == expr(ast.r, val);
           break;

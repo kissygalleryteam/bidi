@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mocha Test for Bidi</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="mocha.css" />
+    <link rel="stylesheet" href="../demo/bootstrap.css" />
+    <!--<script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>-->
+    <script src="http://g.tbcdn.cn/kissy/k/1.4.1/seed.js" charset="utf-8"></script>
+  </head>
+
+  <body>
+
+  <div class="container" style="padding: 10px 0">
+    <ul class="nav nav-tabs">
+      <li><a href="index.html?noSpec">All Demo</a></li>
+      <li><a href="index.html?noSpec&grep=Simple">Simple</a></li>
+      <li><a href="index.html?noSpec&grep=List">List</a></li>
+      <li><a href="index.html?noSpec&grep=Form">Form</a></li>
+      <li><a href="index.html?noSpec&grep=Web mail">Webmail</a></li>
+      <li><a href="../demo/todo/index.html">Todo</a></li>
+      <li class="pull-right"><a href="index.html">All Test</a></li>
+      <li class="pull-right"><a href="index.html?grep=Simple">Simple</a></li>
+      <li class="pull-right"><a href="index.html?grep=List">List</a></li>
+      <li class="pull-right"><a href="index.html?grep=Form">Form</a></li>
+      <li class="pull-right"><a href="index.html?grep=Web mail">Webmail</a></li>
+    </ul>
+  </div>
+
+    <div class="container bidi-viewer" data-view="user"></div>
+
+    <div class="container bidi-viewer" data-view="form">
+      <script type="text/xtemplte">
+        <div class="panel panel-primary">
+          <div class="panel-heading">表单示例<a class="pull-right" href="http://jsfiddle.net/AAEZP/4/embedded/result,html,js/">Edit It &gt;&gt;</a></div>
+            <form class="form-horizontal" action="#">
+
+              <div class="form-group problem">
+                <label class="col-lg-2 control-label">退款原因: </label>
+                <div class="col-lg-10">
+                  <p class="form-control-static">
+                    <span {{watch "class: isEdit: hide"}}>
+                      <em {{{watch "text: problem.$item.text"}}}></em>
+                    </span>
+                    <select name="key1" {{watch "select: problem.defaultValue" "class: !isEdit: hide"}}>
+                      {{#each problem.values}}
+                      <option value="{{value}}">{{text}}</option>
+                      {{/each}}
+                    </select>
+                    <a href="#nowhere" {{watch "click: editable"}}>修改</a>
+                  </p>
+                </div>
+              </div>
+
+              {{#reasons}}
+              <div class="form-group reasons" {{watch "class: !reasons.values: hide"}}>
+                <label class="col-lg-2 control-label">问题描述:</label>
+                <div class="col-lg-10">
+                  {{#watch "linkage: reasons.values: problem" "radio: reasons.defaultValue"}}
+                  <label class="radio-inline">
+                    <input type="radio" name="{{../name}}" value="{{value}}" {{watch "print: reasons.values.length == 1: checked"}}/>
+                    {{text}}
+                  </label>
+                  {{/watch}}
+                </div>
+              </div>
+              {{/reasons}}
+
+              <div class="form-group hide" {{watch "class: !subs.values: hide"}}>
+                <label class="col-lg-2 control-label">问题描述第三级:</label>
+                <div class="col-lg-10">
+                {{#watch "linkage: subs.values: reasons"}}
+                <label class="radio-inline">
+                  <input type="radio" name="name2" value="{{value}}"/>
+                  {{text}}
+                </label>
+                {{/watch}}
+                </div>
+              </div>
+
+              <p class="form-group">
+                <label class="col-lg-2 control-label">货物当前状态:</label>
+                <span class="col-lg-10">
+                  <label class="radio-inline"><input type="radio" name="status" value="1" />未寄回商品</label>
+                  <label class="radio-inline"><input class="isSendBack" type="radio" name="status" value="2" {{watch "value: itemSendBack"}}/>已寄回商品</label>
+                  <span class="label label-warning hide" {{watch "class: !itemSendBack: hide"}}>亲，没得到卖家同意，请不要退货，以免给您带来损失</span>
+                </span>
+              </p>
+
+              <div class="form-group hide logistics" {{watch "class: !itemSendBack: hide"}}>
+                <label class="col-lg-2 control-label">退货信息:</label>
+
+                <div class="col-lg-10">
+                  <p class="form-control-static">
+                  <select name="safd" {{watch "attr: !itemSendBack: disabled"}}>
+                  {{#each logistics.values}}
+                    <option value="{{value}}">{{text}}</option>
+                  {{/each}}
+                  </select>
+                  退款额度<span class="label label-info realmax" {{{watch "text: realMax"}}}></span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="form-group hide feedback" {{watch "class: !itemSendBack: hide"}}>
+                <label class="col-lg-2 control-label">退货反馈:</label>
+                <p class="col-lg-10">
+                {{#each feedback.values}}
+                <label class="radio-inline">
+                  <input type="radio" name="name" value="{{value}}" {{watch "attr: !itemSendBack: disabled"}}/>
+                  {{text}}
+                </label>
+                {{/each}}
+                </p>
+              </div>
+
+
+              <div class="form-group hide jude" {{watch "class: !reasons.$item.jude || itemSendBack: hide"}}>
+                <label class="col-lg-2 control-label">要求谁来评判: </label>
+                
+                <p class="col-lg-10">
+                {{#each jude.values}}
+                <label class="radio-inline">
+                  <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.$item.jude: disabled"}}/>
+                  {{text}}
+                </label>
+                {{/each}}
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label class="col-lg-2 control-label">联系手机:</label>
+                <p class="col-lg-10 form-control-static">
+                  <input type="text" {{watch "value: phone"}}/>
+                </p>
+              </div>
+
+              <div class="form-group">
+                <p class="col-lg-offset-2 col-lg-10"">
+                <input type="button" value="提交" class="btn btn-default" {{watch "click: submit"}}/>
+                </p>
+              </div>
+
+              </form>
+        </div>
+      </script>
+
+    </div>
+
+    <div class="container bidi-viewer" data-view="list">
+
+      <script type="text/xtemplate">
+        <div class="panel panel-primary">
+          <div class="panel-heading">示例3，list</div>
+          <h2>Your seat reservations (<span {{{watch "text: seats.length"}}}></span>)</h2>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Passenger name</th><th>Meal</th><th>Surcharge</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#watch "list: seats"}}
+              <tr>
+                <td><input value="{{name}}" /></td>
+                <td><select {{watch "select: meal"}}>
+                    {{#each ../meals}}
+                      {{#if ../meal === xindex}}
+                      <option value="{{value}}" selected="selected">{{mealName}}</option>
+                      {{else}}
+                      <option value="{{value}}">{{mealName}}</option>
+                      {{/if}}
+                    {{/each}}
+                </select></td>
+                <td class="price" {{{watch "text: $root.price: formattedPrice"}}}></td>
+                <td><a class="btn btn-danger" href="#nowhere" {{watch "click: $root.remove"}}>Remove</a></td>
+              </tr>
+              {{/watch}}
+            </tbody>
+          </table>
+
+          <button class="btn btn-primary" {{watch "click: addSeat" "attr: seats.length > 5: disabled"}}>Reserve another seat</button>
+
+          <h3 {{watch "class: totalSurcharge <= 0: hide"}}>
+            Total surcharge: <span {{{watch "text: totalSurcharge: formattedPrice"}}}></span>
+          </h3>
+        </div>
+      </script>
+
+    </div>
+
+    <div class="container bidi-viewer" data-view="webmail">
+
+      <script type="text/xtemplate">
+        <div class="panel panel-primary">
+
+        <div class="panel-heading">示例4：web app</div>
+        <!-- Folders -->
+        <ul class="nav nav-tabs">
+          {{#watch "list: folders"}}
+          <li {{watch "class: isSeleted: active" "click: goFold"}}>
+            <a href="#nowhere">{{text}}</a>
+          </li>
+          {{/watch}}
+        </ul>
+
+        <!-- Mails grid -->
+        <table class="mails table table-bordered table-hover" {{watch "class: !mails.length: hide"}}>
+          <thead><tr><th>From</th><th>To</th><th>Subject</th><th>Date</th></tr></thead>
+          <tbody>
+            {{#watch "list: mails"}}
+            <tr {{watch "click: $root.goToMail"}}>
+              <td>{{from}}</td>
+              <td>{{to}}</td>
+              <td>{{subject}}</td>
+              <td>{{date}}</td>
+            </tr>
+          {{/watch}}
+          </tbody>
+        </table>
+
+        <!-- Chosen mail -->
+        <div class="viewMail" {{watch "class: !choosedMail: hide"}}>
+          <div class="mail">
+            {{#watch "with: choosedMail"}}
+            <div class="mailInfo">
+              <h1>{{subject}}</h1>
+              <p><label>From</label>: <span>{{from}}</span></p>
+              <p><label>To</label>: <span>{{to}}</span>/</p>
+              <p><label>Date</label>: <span>{{date}}</span></p>
+            </div>
+            <p class="message">{{{messageContent}}}</p>
+            {{/watch}}
+          </div>
+        </div>
+      </div>
+      </script>
+
+    </div>
+
+    <div class="container bidi-viewer" data-view="form-h">
+      <script type="text/xtemplte">
+        <div class="panel panel-primary">
+          <div class="panel-heading">复杂表单示例</div>
+            <form class="form-horizontal" action="#">
+
+              <div class="form-group goodsStatus">
+                <label class="col-lg-2 control-label">是否收到货: </label>
+                <div class="col-lg-10"  {{watch "radio: goodsStatus.defaultValue"}}>
+                    {{#each goodsStatus.values}}
+                      <label class="radio-inline">
+                          <input name="goodsStatus" type="radio" class="radio" value="{{value}}" 
+                          {{#if value === goodsStatus.defaultValue}}checked{{/if}} > {{text}}
+                      </label>
+                    {{/each}}
+                </div>
+              </div>
+
+              <div class="form-group reasons">
+                <label class="col-lg-2 control-label">问题原因: </label>
+                <div class="col-lg-10">
+                  <p class="form-control-static">
+                    <select name="select1">
+                      {{#watch  "linkage: reasons.values: goodsStatus" "select:reasons.defaultValue"}}
+                      {{@if xindex}} {{else}}<option value="-1" {{watch "print: !reasons.defaultValue:selected"}}>请选择原因</option> {{/if}}
+                      <option value="{{value}}" {{#if value === reasons.defaultValue}}selected{{/if}}>{{text}}</option>
+                      {{/watch}}
+                    </select>
+                    <input type="hidden" name="reasonsText" {{watch "value: reasons.$item.text"}}>
+                  </p>
+                </div>
+              </div>
+
+              <div class="form-group descriptions">
+                <label class="col-lg-2 control-label">问题描述: </label>
+                <div class="col-lg-10">
+                  {{#watch "linkage: descriptions.values: reasons" "radio: descriptions.defaultValue"}}
+                  <label class="radio-inline">
+                    <input type="radio" name="aaa" value="{{value}}" {{watch "print: descriptions.values.length == 1: checked"}}/>
+                    {{text}}
+                  </label>
+                  {{/watch}}
+                </div>
+              </div>
+
+              <div class="form-group descriptions">
+                <label class="col-lg-2 control-label">退款金额: </label>
+                <div class="col-lg-10">
+                  <input type="text" name="refundFee" class="text-input refund-money J_RefundFee" value="{{value}}"
+                   {{watch "attr:goodsStatus.defaultValue == 0:disabled"}}>
+                </div>
+              </div>
+
+              </form>
+        </div>
+      </script>
+
+    </div>
+    <div id="mocha"></div>
+
+    <script src="mocha.js"></script>
+    <script src="expect.js"></script>
+    <script>mocha.setup('bdd')</script>
+
+    <script type="text/javascript">
+      var S = KISSY;
+      S.Config.debug = true;
+      if (S.Config.debug) {
+        var srcPath = "../../../";
+        S.config({
+          packages:[
+            {
+              name: "kg",
+              path: srcPath,
+              charset: "utf-8",
+              ignorePackageNameInUri: true
+            }
+          ]
+        });
+      }
+      S.use('kg/bidi/1.2/spec/bidi')
+    </script>
+  </body>
+</html>

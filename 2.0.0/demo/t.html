@@ -1,0 +1,78 @@
+<script src="http://g.tbcdn.cn/kissy/k/1.4.1/seed.js"></script>
+<form action="mtop.serviceone.gaia.submitApply" class="J_ApplyForm">
+    <div  class="bidi-viewer J_FormBidi" data-view="form">
+        <script type="text/xtemplte">
+        <div class="panel panel-primary">
+          <div class="panel-heading">复杂表单示例</div>
+            <form class="form-horizontal" action="#">
+
+              <div class="form-group goodsStatus">
+                <label class="col-lg-2 control-label">是否收到货: </label>
+                <div class="col-lg-10"  {{watch "radio: goodsStatus.defaultValue"}}>
+                    {{#each goodsStatus.values}}
+                      <label class="radio-inline">
+                          <input name="goodsStatus" type="radio" class="radio" value="{{value}}" 
+                          {{#if value === goodsStatus.defaultValue}}checked{{/if}} > {{text}}
+                      </label>
+                    {{/each}}
+                </div>
+              </div>
+
+              <div class="form-group reasons">
+                <label class="col-lg-2 control-label">问题原因: </label>
+                <div class="col-lg-10">
+                  <p class="form-control-static">
+                    <select name="select1">
+                      {{#watch  "linkage: reasons.values: goodsStatus" "select:reasons.defaultValue"}}
+                      {{@if xindex}} {{else}}<option value="-1" {{watch "print: !reasons.defaultValue:selected"}}>请选择原因</option> {{/if}}
+                      <option value="{{value}}" {{#if value === reasons.defaultValue}}selected{{/if}}>{{text}}</option>
+                      {{/watch}}
+                    </select>
+                    <input type="hidden" name="reasonsText" {{watch "value: reasons.$item.text"}}>
+                  </p>
+                </div>
+              </div>
+
+              <div class="form-group descriptions">
+                <label class="col-lg-2 control-label">问题描述: </label>
+                <div class="col-lg-10">
+                  {{#watch "linkage: descriptions.values: reasons" "radio: descriptions.defaultValue"}}
+                  <label class="radio-inline">
+                    <input type="radio" name="aaa" value="{{value}}" {{watch "print: descriptions.values.length == 1: checked"}}/>
+                    {{text}}
+                  </label>
+                  {{/watch}}
+                </div>
+              </div>
+
+              <div class="form-group descriptions">
+                <label class="col-lg-2 control-label">退款金额: </label>
+                <div class="col-lg-10">
+                  <input type="text" name="refundFee" class="text-input refund-money J_RefundFee" value="{{value}}"
+                   {{watch "attr:goodsStatus.defaultValue == 0:disabled"}}>
+                </div>
+              </div>
+
+              </form>
+        </div>
+      </script>
+    </div>
+</form>
+<script type="text/javascript">
+      var S = KISSY;
+      S.Config.debug = true;
+      if (S.Config.debug) {
+        var srcPath = "../../../";
+        S.config({
+          packages:[
+            {
+              name: "kg",
+              path: srcPath,
+              charset: "utf-8",
+              ignorePackageNameInUri: true
+            }
+          ]
+        });
+      }
+</script>
+<script src="/serviceone/mods/bidi/1.2/demo/t.js" type="text/javascript" charset="utf-8"></script>

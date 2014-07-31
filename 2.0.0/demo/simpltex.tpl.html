@@ -1,0 +1,11 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">示例1,简单情况. <a class="pull-right" href="http://jsfiddle.net/AAEZP/1/embedded/result,html,js/">Edit It &gt;&gt;</a>
+  </div>
+  <p>hello, I am <strong {{{watch "text: fullName"}}}></strong></p>
+  <p>hello, I am <strong {{{watch "text: firstName"}}}></strong></p>
+  First Name: <input {{watch "value: firstName"}}/><br>
+  Last Name: <input {{watch "value: lastName"}}/> {{text}}
+  <button {{watch "click: capitalizeLastName"}}>Go caps</button>
+</div>
+<input type="hidden" {{watch "attr: a == 1: disabled"}}/>
+<input type="hidden" {{watch "attr: a === 1: disabled"}}/>

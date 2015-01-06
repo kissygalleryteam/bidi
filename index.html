@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>demo标题</title>
+  <script type="text/javascript">
+  window.location.href = '../spec/index.html?noSpec'
+  </script>
+</head>
+<body>
+
+<<<<<<< HEAD:1.0/demo/index.html
+=======
+<h2>demo标题</h2>
+
+<div class="bidi-viewer" data-view="user">
+  <script type="text/xtemplate">
+    <p>hello, I am <strong {{text "fullName"}}></strong></p>
+    <p>hello, I am <strong {{text "firstName"}}></strong></p>
+    First Name: <input {{value "firstName"}}/><br>
+    Last Name: <input {{value "lastName"}}/>
+    <button {{click "capitalizeLastName"}}>Go caps</button>
+  </script>
+</div>
+
+<script>
+    var S = KISSY;
+    if (S.Config.debug) {
+      var srcPath = "../";
+      S.config({
+        packages:[
+          {
+            name: "gallery",
+            path: srcPath,
+            charset: "utf-8",
+            ignorePackageNameInUri: true
+          }
+        ]
+      });
+    }
+
+    S.use('gallery/bidi/index', function (S, Bidi) {
+
+      Bidi.active(['text', 'click', 'value']);
+      Bidi.xbind('user', {
+        firstName: 'Song',
+        lastName: 'Eward',
+        fullName: function(){
+          return this.get('firstName') + ' ' + this.get('lastName');
+        },
+        capitalizeLastName: function(){
+          var lastName = this.get('lastName').toUpperCase();
+          this.set('lastName', lastName);
+        }
+      });
+
+      Bidi.init();
+
+    })
+</script>
+
+>>>>>>> 0b2da3de0204d9d22f47b388293c36deb7bc8857:index.html
+</body>
+</html>

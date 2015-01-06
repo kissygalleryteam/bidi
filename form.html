@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>demo标题</title>
+  <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <style type="text/css">
+  .hide { display: none; }
+  </style>
+</head>
+<body>
+
+<h2>demo标题</h2>
+
+<div class="bidi-viewer" data-view="form">
+  <script type="text/xtemplte">
+
+  <p class="item">
+    <label>退款原因: </label>
+    <select name="key1" {{watch "select: problem"}}>
+      {{#each problem}}
+      <option value="{{value}}">{{text}}</option>
+      {{/each}}
+    </select>
+  </p>
+
+  <p class="item" {{watch "class: !reasons: hide"}}>
+    <label>问题描述：</label>
+    {{#watch "linkage: reasons: problem" "radio: reasons"}}
+    <label>
+      <input type="radio" name="name1" value="{{value}}"/>
+      {{text}}
+    </label>
+    {{/watch}}
+  </p>
+
+  <p class="item hide" {{watch "class: !subs: hide"}}>
+    <label>问题描述第三级：</label>
+    {{#watch "linkage: subs: reasons"}}
+    <label>
+      <input type="radio" name="name2" value="{{value}}"/>
+      {{text}}
+    </label>
+    {{/watch}}
+  </p>
+
+  <p class="item">
+    <label>货物当前状态</label>
+    <span class="radio-box">
+      <label><input type="radio" name="status" value="1" />未寄回商品</label>
+      <label><input type="radio" name="status" value="2" {{watch "value: itemSendBack"}}/>已寄回商品</label>
+    </span>
+    <span class="tips hide" {{watch "class: !itemSendBack: hide"}}>亲，没得到卖家同意，请不要退货，以免给您带来损失</span>
+  </p>
+
+  <p class="item hide" {{watch "class: !itemSendBack: hide"}}>
+    <label>退货信息</label>
+    <select name="safd" {{watch "attr: !itemSendBack: disabled"}}>
+    {{#each logistics}}
+      <option value="{{value}}">{{text}}</option>
+    {{/each}}
+    </select>
+  </p>
+
+  <p class="item hide" {{watch "class: !itemSendBack: hide"}}>
+    <label>退货反馈：</label>
+    {{#each feedback}}
+    <label>
+      <input type="radio" name="name" value="{{value}}" {{watch "attr: !itemSendBack: disabled"}}/>
+      {{text}}
+    </label>
+    {{/each}}
+  </p>
+
+  <p class="item hide" {{watch "class: !reasons.jude || itemSendBack: hide"}}>
+    <label>要求谁来评判: </label>
+    {{#each jude}}
+    <label>
+      <input type="radio" name="jude" value="{{value}}" {{watch "attr: !reasons.jude: disabled"}}/>
+      {{text}}
+    </label>
+    {{/each}}
+  </p>
+
+  <p class="item">
+    <label>联系手机：
+    <input type="text" {{watch "value: phone"}}/>
+    </label>
+  </p>
+  </script>
+</div>
+
+<script>
+    var S = KISSY;
+    if (S.Config.debug) {
+      var srcPath = "../";
+      S.config({
+        packages:[
+          {
+            name: "gallery",
+            path: srcPath,
+            charset: "utf-8",
+            ignorePackageNameInUri: true
+          }
+        ]
+      });
+    }
+
+    S.use('gallery/bidi/index', function (S, Bidi) {
+
+      var form = Bidi.xform('form', {
+
+        problem: {
+          $defaultValue: 2,
+          $values: [
+            {value: 1, text: '大小尺寸不符合', reasons: [11, 12]},
+            {value: 2, text: '材料面料不符合', reasons: [21, 22]},
+            {value: 3, text: '工艺手艺问题', reasons: [31, 32, 33]},
+            {value: 4, text: '颜色、款式、图案描述不符', reasons: [44, 45]},
+            {value: 5, text: '颜色、款式、图案描述不符'}
+          ],
+        },
+
+        reasons: {
+          $defaultValue: null,
+          $values: [
+            {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc", subs: [11, 12]},
+            {value: 12, text: '拼接、走线不齐'},
+            {value: 21, text: '材质不符', jude: true, subs: [21, 22, 12]},
+            {value: 22, text: '严重缩水、褪色、起球、掉毛'},
+            {value: 31, text: '收到商品时有破损'},
+            {value: 32, text: '拼接、走线不齐', jude: true},
+            {value: 33, text: '开线、走丝', jude: true},
+            {value: 44, text: '有污渍'},
+            {value: 45, text: '配件破损或不符'}
+          ]
+        },
+
+        subs: {
+          $defaultValue: null,
+          $values: [
+            {value: 11, text: '尺寸、尺码不符', jude: true, title: "desc"},
+            {value: 12, text: '拼接、走线不齐'},
+            {value: 21, text: '材质不符', jude: true},
+            {value: 22, text: '严重缩水、褪色、起球、掉毛'},
+          ]
+        },
+
+        logistics: {
+          $defaultValue: null,
+          $values: [
+            {value: 1, text: 'EMS'},
+            {value: 2, text: '申通E物流'},
+            {value: 3, text: '圆通速递'},
+            {value: 4, text: '宅急送'}
+          ]
+        },
+
+        jude: {
+          $defaultValue: null,
+          $values: [
+            {value: 1, text: '31名大众评审'},
+            {value: 2, text: '淘宝小二评审'}
+          ]
+        },
+
+        phone: 1111111111,
+
+        feedback: {
+          value: null,
+          $values: [
+            {value: 1, text: '卖家已签收未处理'},
+            {value: 2, text: '卖家拒绝签收'},
+            {value: 3, text: '卖家反馈未收到货'},
+            {value: 4, text: '退货地址不详细'}
+          ]
+        }
+
+      });
+
+      Bidi.init();
+
+    })
+</script>
+
+</body>
+</html>

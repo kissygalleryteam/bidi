@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>demo lists</title>
+  <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js" charset="utf-8"></script>
+  <style type="text/css" media="screen">
+  .hide { display: none; }
+  </style>
+</head>
+<body>
+
+<h2>demo标题</h2>
+
+<div class="bidi-viewer" data-view="list">
+
+  <script type="text/xtemplate">
+  <h2>Your seat reservations (<span {{watch "text: seats.length"}}></span>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Passenger name</th><th>Meal</th><th>Surcharge</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#watch "list: seats"}}
+      <tr>
+        <td><input value="{{name}}" /></td>
+        <td><select {{watch "select: meal"}}>
+            {{#each ../meals}}
+              {{#if ../meal === xindex}}
+              <option value="{{price}}" selected="selected">{{mealName}}</option>
+              {{else}}
+              <option value="{{price}}">{{mealName}}</option>
+              {{/if}}
+            {{/each}}
+        </select></td>
+        <td {{watch "text: price: formattedPrice"}}></td>
+        <td><a href="#nowhere" {{watch "click1: removeSeat"}}>Remove</a></td>
+      </tr>
+      {{/watch}}
+    </tbody>
+  </table>
+
+  <button data-bind="click: addSeat, enable: seats().length < 5">Reserve another seat</button>
+
+  <h3 {{watch "class: !totalSurcharge: hide"}}>
+    Total surcharge: <span {{watch "text: totalSurcharge: formattedPrice"}}></span>
+  </h3>
+  </script>
+
+</div>
+
+<script>
+    var S = KISSY;
+    if (S.Config.debug) {
+      var srcPath = "../";
+      S.config({
+        packages:[
+          {
+            name: "gallery",
+            path: srcPath,
+            charset: "utf-8",
+            ignorePackageNameInUri: true
+          }
+        ]
+      });
+    }
+
+    S.use('gallery/bidi/index', function (S, Bidi) {
+
+      function getPrice(){
+        var meal = this.get('meal');
+        var m = this.get('meals')[meal];
+        return m.price;
+      }
+
+      function formattedPrice(price){
+        return price ? "$" + price.toFixed(2) : "None";        
+      }   
+
+      Bidi.pipe('formattedPrice', formattedPrice);
+
+      Bidi.xbind('list', {
+        seats: [
+          {name: "Steve", meal: 0, price: getPrice},
+          {name: "Hanwen", meal: 1, price: getPrice}
+        ],
+        meals: [
+          { mealName: "Standard (sandwich)", price: 0 },
+          { mealName: "Premium (lobster)", price: 34.95 },
+          { mealName: "Ultimate (whole zebra)", price: 290 }
+        ],
+        totalSurcharge: function(){
+
+          var seats = this.get('seats');
+          var price = 0;
+
+          S.each(seats, function(seat){
+            price += this.get('price', seat);
+          }, this);
+
+          return price;
+        }
+      });
+
+      Bidi.init();
+
+    })
+</script>
+
+</body>
+</html>
